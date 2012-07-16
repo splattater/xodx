@@ -12,10 +12,14 @@ class Xodx_ActivityController extends Xodx_Controller
         $verbUri = $request->getValue('verb', 'post');
         $actTypeUri = $request->getValue('type', 'post');
         $actContent = $request->getValue('content', 'post');
-
+        $actLink = $request->getValue('userlink', 'post');
+        $actPhoto = $request->getValue('photo', 'post');
+        
         $object = array(
             'type' => $actTypeUri,
-            'content' => $actContent
+            'content' => $actContent,
+        	'link' => $actLink,
+        	'photo' => $actPhoto
         );
 
         $debugStr = $this->addActivity($actorUri, $verbUri, $object);
@@ -44,13 +48,13 @@ class Xodx_ActivityController extends Xodx_Controller
         $nsAtom = 'http://www.w3.org/2005/Atom/';
         $nsAair = 'http://xmlns.notu.be/aair#';
 
-        $activityUri = 'http://localhost/~natanael/xodx/activity/' . md5(rand()) . '/';
+        $activityUri = 'http:///xodx/activity/' . md5(rand()) . '/';
         $now = date('c');
 
         if ($object['type'] == 'uri') {
             $objectUri = $object['value'];
         } else {
-            $objectUri = 'http://localhost/~natanael/xodx/object/' . md5(rand()) . '/';
+            $objectUri = 'http://xodx.local/xodx/object/' . md5(rand()) . '/';
         }
 
         $activity = array(
