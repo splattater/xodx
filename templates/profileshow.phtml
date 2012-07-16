@@ -72,35 +72,46 @@ if ($contact['name'] != null) {
                 <th>Verb</th>
                 <td>
                     <select name="verb">
-                        <option value="http://xmlns.notu.be/aair#Located" disabled="true">Located</option>
-                        <option value="http://xmlns.notu.be/aair#Join" disabled="true">Join</option>
-                        <option value="http://xmlns.notu.be/aair#MakeFriend" disabled="true">MakeFriend</option>
-                        <option value="http://xmlns.notu.be/aair#MarkAsFavorite" disabled="true">MarkAsFavorite</option>
-                        <option value="http://xmlns.notu.be/aair#Play" disabled="true">Play</option>
+                        <option value="http://xmlns.notu.be/aair#Located" hidden="true">Located</option>
+                        <option value="http://xmlns.notu.be/aair#Join" hidden="true">Join</option>
+                        <option value="http://xmlns.notu.be/aair#MakeFriend" hidden="true">MakeFriend</option>
+                        <option value="http://xmlns.notu.be/aair#MarkAsFavorite" hidden="true">MarkAsFavorite</option>
+                        <option value="http://xmlns.notu.be/aair#Play" hidden="true">Play</option>
                         <option value="http://xmlns.notu.be/aair#Post" selected="true">Post</option>
-                        <option value="http://xmlns.notu.be/aair#RSVP" disabled="true">RSVP</option>
-                        <option value="http://xmlns.notu.be/aair#Save" disabled="true">Save</option>
-                        <option value="http://xmlns.notu.be/aair#Share" disabled="true">Share</option>
-                        <option value="http://xmlns.notu.be/aair#StartFollowing" disabled="true">StartFollowing</option>
-                        <option value="http://xmlns.notu.be/aair#Tag" disabled="true">Tag</option>
+                        <option value="http://xmlns.notu.be/aair#RSVP" hidden="true">RSVP</option>
+                        <option value="http://xmlns.notu.be/aair#Save" hidden="true">Save</option>
+                        <option value="http://xmlns.notu.be/aair#Share">Share</option>
+                        <option value="http://xmlns.notu.be/aair#StartFollowing" hidden="true">StartFollowing</option>
+                        <option value="http://xmlns.notu.be/aair#Tag" hidden="true">Tag</option>
                     </select>
                 </td>
             </tr>
             <tr>
-                <th>Object</th>
+                <th>Activity Object</th>
                 <td>
                 <table>
                     <tr>
                         <th>Type</th>
                         <td>
+                        	<!-- TODO: Obsolet, da an content/link/photo die Activity erkannt werden kann -->
                             <select name="type">
-                                <option value="http://xmlns.notu.be/aair#Note">Note</option>
+                                <option value="http://rdfs.org/sioc/ns#Post" selected="true">Status</option>
+                                <option value="http://rdfs.org/sioc/ns#link">Link</option>
+                                <option value="http://xmlns.notu.be/aair#Photo">Photo</option>
                             </select>
                         </td>
                     </tr>
                     <tr>
-                        <th>content</th>
+                        <th>Status</th>
                         <td><textarea name="content"></textarea></td>
+                    </tr>
+                    <tr>
+                        <th>Link</th>
+                        <td><textarea name="userlink"></textarea></td>
+                    </tr>
+                    <tr>
+                        <th>Photo</th>
+                        <td><input type="file" name="photo"></td>
                     </tr>
                 </table>
                 </td>
