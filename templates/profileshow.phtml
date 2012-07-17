@@ -93,7 +93,7 @@ if ($contact['name'] != null) {
                     <tr>
                         <th>Type</th>
                         <td>
-                       	    <!-- Obsolet, da an content/link/photo die Activity erkannt werden kann -->
+                            <!-- Obsolet, da an content/link/photo die Activity erkannt werden kann -->
                             <select name="type">
                                 <option value="http://rdfs.org/sioc/ns#Post" selected="true">Status</option>
                                 <option value="http://rdfs.org/sioc/ns#link">Link</option>
@@ -101,23 +101,23 @@ if ($contact['name'] != null) {
                             </select>
                         </td>
                     </tr>
-		</table>
-		<ul class="nav nav-tabs">
-		    <li class="active"><a href="#tab1" data-toggle="tab">Status</a></li>
-		    <li><a href="#tab2" data-toggle="tab">Link</a></li>
-		    <li><a href="#tab3" data-toggle="tab">Photo</a></li>
-		</ul>
-		<div class="tab-content">
-		    <div class="tab-pane active" id="tab1">
-			<p><textarea name="content"></textarea></p>
-		    </div>
-		    <div class="tab-pane" id="tab2">
-			<p><input type="text" name="link"></textarea></p>
-		    </div>
-		    <div class="tab-pane" id="tab3">
-			<p><input type="file" name="photo" /></p>
-		    </div>
-		</div>
+                </table>
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#tab1" data-toggle="tab">Status</a></li>
+                    <li><a href="#tab2" data-toggle="tab">Link</a></li>
+                    <li><a href="#tab3" data-toggle="tab">Photo</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab1">
+                        <p><textarea name="content"></textarea></p>
+                    </div>
+                    <div class="tab-pane" id="tab2">
+                        <p><input type="text" name="link"></textarea></p>
+                    </div>
+                    <div class="tab-pane" id="tab3">
+                        <p><input type="file" name="photo" /></p>
+                    </div>
+                </div>
                 </td>
             </tr>
         </table>
