@@ -58,71 +58,45 @@ if ($contact['name'] != null) {
         </div>
     <?php endif; ?>
     <h2>Add Activity ...</h2>
-    <form method="post" action="?c=activity&a=addactivity">
-        <table>
-            <tr>
-                <th>Actor</th>
-                <td>
-                    <?= $this->profileshowName ?>
-
+        <th>Actor</th>
+            <?= $this->profileshowName ?>
+            <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
+        <ul class="nav nav-pills">
+            <li class="active"><a href="#status" data-toggle="tab">Status</a></li>
+            <li><a href="#link" data-toggle="tab">Link</a></li>
+            <li><a href="#photo" data-toggle="tab">Photo</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="status">
+                <form method="post" action="?c=activity&a=addactivity">
+                    <textarea name="content"></textarea>
+                    <input type="hidden" name="verb" value="http://xmlns.notu.be/aair#Post"  >
+                    <input type="hidden" name="type" value="http://rdfs.org/sioc/ns#Post" />
                     <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
-                </td>
-            </tr>
-            <tr>
-                <th>Verb</th>
-                <td>
-                    <select name="verb">
-                        <option value="http://xmlns.notu.be/aair#Located" hidden="true">Located</option>
-                        <option value="http://xmlns.notu.be/aair#Join" hidden="true">Join</option>
-                        <option value="http://xmlns.notu.be/aair#MakeFriend" hidden="true">MakeFriend</option>
-                        <option value="http://xmlns.notu.be/aair#MarkAsFavorite" hidden="true">MarkAsFavorite</option>
-                        <option value="http://xmlns.notu.be/aair#Play" hidden="true">Play</option>
-                        <option value="http://xmlns.notu.be/aair#Post" selected="true">Post</option>
-                        <option value="http://xmlns.notu.be/aair#RSVP" hidden="true">RSVP</option>
-                        <option value="http://xmlns.notu.be/aair#Save" hidden="true">Save</option>
-                        <option value="http://xmlns.notu.be/aair#Share">Share</option>
-                        <option value="http://xmlns.notu.be/aair#StartFollowing" hidden="true">StartFollowing</option>
-                        <option value="http://xmlns.notu.be/aair#Tag" hidden="true">Tag</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th>Activity Object</th>
-                <td>
-                <table>
-                    <tr>
-                        <th>Type</th>
-                        <td>
-                            <!-- Obsolet, da an content/link/photo die Activity erkannt werden kann -->
-                            <select name="type">
-                                <option value="http://rdfs.org/sioc/ns#Post" selected="true">Status</option>
-                                <option value="http://rdfs.org/sioc/ns#link">Link</option>
-                                <option value="http://xmlns.notu.be/aair#Photo">Photo</option>
-                            </select>
-                        </td>
-                    </tr>
-                </table>
-                <ul class="nav nav-tabs">
-                    <li class="active"><a href="#tab1" data-toggle="tab">Status</a></li>
-                    <li><a href="#tab2" data-toggle="tab">Link</a></li>
-                    <li><a href="#tab3" data-toggle="tab">Photo</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="tab1">
-                        <p><textarea name="content"></textarea></p>
-                    </div>
-                    <div class="tab-pane" id="tab2">
-                        <p><input type="text" name="link"></textarea></p>
-                    </div>
-                    <div class="tab-pane" id="tab3">
-                        <p><input type="file" name="photo" /></p>
-                    </div>
-                </div>
-                </td>
-            </tr>
-        </table>
-        <button class="btn btn-primary" type="submit">Do</button>
-    </form>
+                    <button class="btn btn-primary" type="submit">Post</button>
+                </form>
+            </div>
+            <div class="tab-pane" id="link">
+                <form method="post" action="?c=activity&a=addactivity">
+                    <input type="text" name="content" /></br>
+                    <textarea name="content"></textarea>
+                    <input type="hidden" name="verb" value="http://xmlns.notu.be/aair#Share" />
+                    <input type="hidden" name="tpye" value="http://xmlns.notu.be/aair/ns#Link" />
+                    <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
+                    <button class="btn btn-primary" type="submit">Share</button>
+                </form>
+            </div>
+            <div class="tab-pane" id="photo">
+                <form method="post" action="?c=activity&a=addactivity">
+                    <input type="file" name="photo" /></br>
+                    <textarea name="content"></textarea>
+                    <input type="hidden" name="verb" value="http://xmlns.notu.be/aair#Share" />
+                    <input type="hidden" name="type" value="http://xmlns.notu.be/aair/ns#Photo" />
+                    <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
+                    <button class="btn btn-primary" type="submit">Share</button>
+                </form>
+            </div>
+        </div>
     <a href="?c=feed&amp;a=getFeed&amp;uri=<?= urlencode($this->profileshowPersonUri) ?>">Show Activity Feed</a>
     <form method="post" action="?c=user&a=subscribe">
         <div class="input-append">
