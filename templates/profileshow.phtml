@@ -87,7 +87,7 @@ if ($contact['name'] != null) {
                 </form>
             </div>
             <div class="tab-pane" id="photo">
-                <form method="post" action="?c=activity&a=addactivity">
+                <form enctype="multipart/form-data" method="post" action="?c=activity&a=addactivity">
                     <input type="hidden" name="MAX_FILE_SIZE" value="600000" />
                     <input type="file" name="content"/></br>
                     <textarea name="about"></textarea>
