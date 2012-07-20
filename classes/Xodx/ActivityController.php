@@ -7,7 +7,6 @@ class Xodx_ActivityController extends Xodx_Controller
         $bootstrap = $this->_app->getBootstrap();
 
         $request = $bootstrap->getResource('request');
-
         $actorUri = $request->getValue('actor', 'post');
         $verbUri = $request->getValue('verb', 'post');
         $actTypeUri = $request->getValue('type', 'post');
@@ -30,7 +29,8 @@ class Xodx_ActivityController extends Xodx_Controller
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
             case 'http://xmlns.notu.be/aair#Photo';
-                $fileName = $this->uploadImage($formName = 'content');
+                $fieldName = 'content';
+                $fileName = $this->_uploadImage($fieldName);
                 $object = array(
                 'type' => $actTypeUri,
                 'about' => $request->getValue('about', 'post'),
@@ -167,48 +167,49 @@ class Xodx_ActivityController extends Xodx_Controller
             $store->addMultipleStatements($graphUri, $activity->toGraphArray());
         }
     }
+
     /**
     * This method uploads an image file after using an upload form
     * @param $fileName the name.ext of the file posted
-    * @return new reference filename on server
+    * @return Array with 'fileId' and 'mimeType'
     */
-    public function uploadImage($formName)
+    private function _uploadImage($fieldName)
     {
-        $uploadDir = '/var/www/xodx/bin/';
-        $checkFile = basename($_FILES[$formName]['name']);
+        $uploadDir = '/var/www/xodx/raw/';
+        $checkFile = basename($_FILES[$fieldName]['name']);
         $pathParts = pathinfo($checkFile);
 
-        // Check if file has suffix
-        if (isset($pathParts['extension'])) {
-            $fileSuffix = $pathParts['extension'];
+        // Check if file's MIME-Type is an image
+        // TODO Substitute browser MIME-Type with PHP Fileinfo
+        // http://de2.php.net/manual/de/ref.fileinfo.php
+        $checkType = $_FILES[$fieldName]['type'];
+        $allowedTypes = array(
+            'image/png',
+            'image/jpeg',
+            'image/gif',
+            'image/tiff',
+            'image/x-ms-bmp',
+            'image/x-bmp',
+            'image/bmp',
+        );
+
+        if (!in_array($checkType, $allowedTypes)) {
+            throw new Exception('Unsupported MIME-Type: ' . $checkType);
+            return false;
         }
 
-        // Check if files MIME-Type is an image
-        $checkType = $_FILES[$formName]['type'];
-        $mimeSuf = basename($checkType);
-        if ($mimeSuf != 'gif' && ($mimeSuf) != 'png' && ($mimeSuf) != 'jpg' && ($mimeSuf) != 'jpeg' && ($mimeSuf) != 'bmp') {
-            return FALSE;
-        }
-        else {
-            $fileSuffix = basename($checkType);
-        }
-
-        // Check if file is an image
-        if ($fileSuffix == 'gif' || 'png' || 'jpg' || 'jpeg' || 'bmp') {
-            $imageSize = getimagesize($_FILES[$formName]['tmp_name']);
-            if ($imageSize[0] <= 0 || $imageSize[1] <= 0) {
-                return FALSE;
-            }
-            $uploadFile = md5(rand()) . $fileSuffix;
-            $uploadPath = $uploadDir . $uploadFile;
-        }
+        $uploadFile = md5(rand());
+        $uploadPath = $uploadDir . $uploadFile;
 
         // Upload File
-        if (move_uploaded_file($_FILES[$formName]['tmp_name'], $uploadPath)) {
+        if (move_uploaded_file($_FILES[$fieldName]['tmp_name'], $uploadPath)) {
+            $return = array (
+                'fileId' => $uploadFile,
+                'mimeType' => $checkType
+            );
             return $uploadFile;
-        }
-        else {
-            return FALSE;
+        } else {
+            throw new Exception('Could not move uploaded file to upload directory: ' . $uploadPath);
         }
     }
 }
