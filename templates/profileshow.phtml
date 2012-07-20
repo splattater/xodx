@@ -71,7 +71,7 @@ if ($contact['name'] != null) {
                 <form method="post" action="?c=activity&a=addactivity">
                     <textarea name="content"></textarea>
                     <input type="hidden" name="verb" value="http://xmlns.notu.be/aair#Post"  >
-                    <input type="hidden" name="type" value="http://rdfs.org/sioc/ns#Post" />
+                    <input type="hidden" name="type" value="http://xmlns.notu.be/aair#Note" />
                     <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
                     <button class="btn btn-primary" type="submit">Post</button>
                 </form>
@@ -79,19 +79,19 @@ if ($contact['name'] != null) {
             <div class="tab-pane" id="link">
                 <form method="post" action="?c=activity&a=addactivity">
                     <input type="text" name="content" /></br>
-                    <textarea name="content"></textarea>
+                    <textarea name="about"></textarea>
                     <input type="hidden" name="verb" value="http://xmlns.notu.be/aair#Share" />
-                    <input type="hidden" name="type" value="http://xmlns.notu.be/aair/ns#Link" />
+                    <input type="hidden" name="type" value="http://xmlns.notu.be/aair#Link" />
                     <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
                     <button class="btn btn-primary" type="submit">Share</button>
                 </form>
             </div>
             <div class="tab-pane" id="photo">
                 <form method="post" action="?c=activity&a=addactivity">
-                    <input type="file" name="photo" /></br>
-                    <textarea name="content"></textarea>
+                    <input type="file" name="content" /></br>
+                    <textarea name="about"></textarea>
                     <input type="hidden" name="verb" value="http://xmlns.notu.be/aair#Share" />
-                    <input type="hidden" name="type" value="http://xmlns.notu.be/aair/ns#Photo" />
+                    <input type="hidden" name="type" value="http://xmlns.notu.be/aair#Photo" />
                     <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
                     <button class="btn btn-primary" type="submit">Share</button>
                 </form>
