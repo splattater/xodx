@@ -88,7 +88,8 @@ if ($contact['name'] != null) {
             </div>
             <div class="tab-pane" id="photo">
                 <form method="post" action="?c=activity&a=addactivity">
-                    <input type="file" name="content" /></br>
+                    <input type="hidden" name="MAX_FILE_SIZE" value="600000" />
+                    <input type="file" name="content"/></br>
                     <textarea name="about"></textarea>
                     <input type="hidden" name="verb" value="http://xmlns.notu.be/aair#Share" />
                     <input type="hidden" name="type" value="http://xmlns.notu.be/aair#Photo" />
