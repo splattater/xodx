@@ -15,8 +15,6 @@ class Xodx_ActivityController extends Xodx_Controller
 
         switch ($actTypeUri) {
             case 'http://xmlns.notu.be/aair#Note';
-                $debugStr = var_dump($actTypeUri);
-                $template->addDebug($debugStr);
                 $object = array(
                 'type' => $actTypeUri,
                 'content' => $actContent,
@@ -24,7 +22,6 @@ class Xodx_ActivityController extends Xodx_Controller
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
             case 'http://xmlns.notu.be/aair#Link';
-                var_dump($actTypeUri);
                 $object = array(
                 'type' => $actTypeUri,
                 'about' => $request->getValue('about', 'post'),
@@ -33,7 +30,7 @@ class Xodx_ActivityController extends Xodx_Controller
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
             case 'http://xmlns.notu.be/aair#Photo';
-                var_dump($actTypeUri);
+                $fileName = $this->uploadImage($formName = 'content');
                 $object = array(
                 'type' => $actTypeUri,
                 'about' => $request->getValue('about', 'post'),
@@ -168,6 +165,50 @@ class Xodx_ActivityController extends Xodx_Controller
 
         foreach ($activities as $activity) {
             $store->addMultipleStatements($graphUri, $activity->toGraphArray());
+        }
+    }
+    /**
+    * This method uploads an image file after using an upload form
+    * @param $fileName the name.ext of the file posted
+    * @return new reference filename on server
+    */
+    public function uploadImage($formName)
+    {
+        $uploadDir = '/var/www/xodx/bin/';
+        $checkFile = basename($_FILES[$formName]['name']);
+        $pathParts = pathinfo($checkFile);
+
+        // Check if file has suffix
+        if (isset($pathParts['extension'])) {
+            $fileSuffix = $pathParts['extension'];
+        }
+
+        // Check if files MIME-Type is an image
+        $checkType = $_FILES[$formName]['type'];
+        $mimeSuf = basename($checkType);
+        if ($mimeSuf != 'gif' && ($mimeSuf) != 'png' && ($mimeSuf) != 'jpg' && ($mimeSuf) != 'jpeg' && ($mimeSuf) != 'bmp') {
+            return FALSE;
+        }
+        else {
+            $fileSuffix = basename($checkType);
+        }
+
+        // Check if file is an image
+        if ($fileSuffix == 'gif' || 'png' || 'jpg' || 'jpeg' || 'bmp') {
+            $imageSize = getimagesize($_FILES[$formName]['tmp_name']);
+            if ($imageSize[0] <= 0 || $imageSize[1] <= 0) {
+                return FALSE;
+            }
+            $uploadFile = md5(rand()) . $fileSuffix;
+            $uploadPath = $uploadDir . $uploadFile;
+        }
+
+        // Upload File
+        if (move_uploaded_file($_FILES[$formName]['tmp_name'], $uploadPath)) {
+            return $uploadFile;
+        }
+        else {
+            return FALSE;
         }
     }
 }
