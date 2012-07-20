@@ -14,26 +14,32 @@ class Xodx_ActivityController extends Xodx_Controller
         $actContent = $request->getValue('content', 'post');
 
         switch ($actTypeUri) {
-            case 'http://rdfs.org/sioc/ns#Note';
+            case 'http://xmlns.notu.be/aair#Note';
+                $debugStr = var_dump($actTypeUri);
+                $template->addDebug($debugStr);
                 $object = array(
                 'type' => $actTypeUri,
                 'content' => $actContent,
+                );
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
-                )
             break;
-            case 'http://rdfs.org/sioc/ns#Link';
+            case 'http://xmlns.notu.be/aair#Link';
+                var_dump($actTypeUri);
                 $object = array(
                 'type' => $actTypeUri,
+                'about' => $request->getValue('about', 'post'),
                 'content' => $actContent,
+                );
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
-                )
             break;
-            case 'http://rdfs.org/sioc/ns#Photo';
+            case 'http://xmlns.notu.be/aair#Photo';
+                var_dump($actTypeUri);
                 $object = array(
                 'type' => $actTypeUri,
+                'about' => $request->getValue('about', 'post'),
                 'content' => $actContent,
+                );
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
-                )
             break;
         }
         $template->addDebug($debugStr);
