@@ -180,9 +180,8 @@ class Xodx_ActivityController extends Xodx_Controller
         $pathParts = pathinfo($checkFile);
 
         // Check if file's MIME-Type is an image
-        // TODO Substitute browser MIME-Type with PHP Fileinfo
-        // http://de2.php.net/manual/de/ref.fileinfo.php
-        $checkType = $_FILES[$fieldName]['type'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $checkType = finfo_file($finfo, $_FILES[$fieldName]['tmp_name']);
         $allowedTypes = array(
             'image/png',
             'image/jpeg',
