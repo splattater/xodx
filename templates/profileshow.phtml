@@ -39,13 +39,17 @@ if ($contact['name'] != null) {
         <em><?= $activity['pubDate'] ?></em>
       </p>
       <p>
-        <a href="<?= $activity['authorUri'] ?>"><?= $activity['authorUri'] ?></a>
-        did <a href="<?= $activity['verb'] ?>"><?= $activity['verb'] ?></a>
+        <a href="<?= urlencode($activity['authorUri']) ?>">
+            <?= urlencode($activity['authorUri']) ?>
+        </a>
+        did <a href="<?= urlencode($activity['verb']) ?>"><?= urlencode($activity['verb']) ?></a>
         <?php if (isset($activity['objectType'])) : ?>
 
-        an <a href="<?= $activity['objectType'] ?>"><?= $activity['objectType'] ?></a>
+        an <a href="<?= urlencode($activity['objectType']) ?>">
+            <?= urlencode($activity['objectType']) ?>
+        </a>
         <?php endif; ?>
-        : <a href="<?= $activity['object'] ?>"><?= $activity['object'] ?></a>
+        : <a href="<?= urlencode($activity['object']) ?>"><?= urlencode($activity['object']) ?></a>
         <?php if (isset($activity['objectContent'])) : ?>
 
         <?= $activity['objectContent'] ?>
