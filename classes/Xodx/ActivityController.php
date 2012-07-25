@@ -73,7 +73,7 @@ class Xodx_ActivityController extends Xodx_Controller
         } else {
             // Take photo's filename as objectname
             if ($object['type'] == $nsAair . 'Photo') {
-                $objectUri = 'http://xodx.local/xodx/object/' . $object['fileName'] . '/';
+                $objectUri = 'http://xodx.local/?c=media&a=get&mediaId=' . $object['fileName'];
             } else {
                 $objectUri = 'http://xodx.local/xodx/object/' . md5(rand()) . '/';
             }
@@ -146,6 +146,7 @@ class Xodx_ActivityController extends Xodx_Controller
                     ),
                 )
             );
+            // Triples of photo object
             if ($object['type'] == $nsAair . 'Photo') {
                 $activity[$objectUri] = array(
                     $nsSioc . 'URL' => array(
@@ -162,11 +163,25 @@ class Xodx_ActivityController extends Xodx_Controller
                     ),
                 );
             }
+            // Adding user text about photo/link
+            if (
+                ($object['type'] == $nsAair . 'Photo' || $object['type'] == $nsAair . 'Link') &&
+                !empty($object['about'])
+            ) {
+                $activity[$objectUri] = array(
+                    $nsAair . 'content' => array(
+                        array(
+                            'type' => 'literal',
+                            'value' => $object['about']
+                        )
+                    ),
+                );
+            }
         }
         $store->addMultipleStatements($graphUri, $activity);
 
         $pushController = new Xodx_PushController($this->_app);
-        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
+        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . htmlentities($actorUri);
 
         $pushController->publish($feedUri);
 
