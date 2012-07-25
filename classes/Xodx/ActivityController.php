@@ -15,26 +15,28 @@ class Xodx_ActivityController extends Xodx_Controller
         switch ($actTypeUri) {
             case 'http://xmlns.notu.be/aair#Note';
                 $object = array(
-                'type' => $actTypeUri,
-                'content' => $actContent,
+                    'type' => $actTypeUri,
+                    'content' => $actContent,
                 );
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
             case 'http://xmlns.notu.be/aair#Link';
                 $object = array(
-                'type' => $actTypeUri,
-                'about' => $request->getValue('about', 'post'),
-                'content' => $actContent,
+                    'type' => $actTypeUri,
+                    'about' => $request->getValue('about', 'post'),
+                    'content' => $actContent,
                 );
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
             case 'http://xmlns.notu.be/aair#Photo';
                 $fieldName = 'content';
-                $fileName = $this->_uploadImage($fieldName);
+                $fileInfo = $this->_uploadImage($fieldName);
                 $object = array(
-                'type' => $actTypeUri,
-                'about' => $request->getValue('about', 'post'),
-                'content' => $actContent,
+                    'type' => $actTypeUri,
+                    'about' => $request->getValue('about', 'post'),
+                    'content' => $actContent,
+                    'fileName' => $fileInfo['fileId'],
+                    'mimeType' => $fileInfo['mimeType'],
                 );
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
@@ -69,7 +71,12 @@ class Xodx_ActivityController extends Xodx_Controller
         if ($object['type'] == 'uri') {
             $objectUri = $object['value'];
         } else {
-            $objectUri = 'http://xodx.local/xodx/object/' . md5(rand()) . '/';
+            // Take photo's filename as objectname
+            if ($object['type'] == $nsAair . 'Photo') {
+                $objectUri = 'http://xodx.local/xodx/object/' . $object['fileName'] . '/';
+            } else {
+                $objectUri = 'http://xodx.local/xodx/object/' . md5(rand()) . '/';
+            }
         }
 
         $activity = array(
@@ -136,11 +143,26 @@ class Xodx_ActivityController extends Xodx_Controller
                     array(
                         'type' => 'literal',
                         'value' => $actContent
-                    )
+                    ),
                 )
             );
+            if ($object['type'] == $nsAair . 'Photo') {
+                $activity[$objectUri] = array(
+                    $nsSioc . 'URL' => array(
+                        array(
+                            'type' => 'uri',
+                            'value' => $this->_app->getBaseUri() . $object['fileName']
+                        )
+                    ),
+                    $nsSioc . 'mimeType' => array(
+                        array(
+                            'type' => 'uri',
+                            'value' => $object['mimeType']
+                        )
+                    ),
+                );
+            }
         }
-
         $store->addMultipleStatements($graphUri, $activity);
 
         $pushController = new Xodx_PushController($this->_app);
@@ -206,7 +228,7 @@ class Xodx_ActivityController extends Xodx_Controller
                 'fileId' => $uploadFile,
                 'mimeType' => $checkType
             );
-            return $uploadFile;
+            return $return;
         } else {
             throw new Exception('Could not move uploaded file to upload directory: ' . $uploadPath);
         }
