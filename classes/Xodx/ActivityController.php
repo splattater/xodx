@@ -20,7 +20,7 @@ class Xodx_ActivityController extends Xodx_Controller
                 );
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
-            case 'http://xmlns.notu.be/aair#Link';
+            case 'http://xmlns.notu.be/aair#Bookmark';
                 $object = array(
                     'type' => $actTypeUri,
                     'about' => $request->getValue('about', 'post'),
@@ -30,7 +30,8 @@ class Xodx_ActivityController extends Xodx_Controller
             break;
             case 'http://xmlns.notu.be/aair#Photo';
                 $fieldName = 'content';
-                $fileInfo = $this->_uploadImage($fieldName);
+                $mediaController = new Xodx_MediaController($this->_app);
+                $fileInfo = $mediaController->uploadImage($fieldName);
                 $object = array(
                     'type' => $actTypeUri,
                     'about' => $request->getValue('about', 'post'),
@@ -73,9 +74,10 @@ class Xodx_ActivityController extends Xodx_Controller
         } else {
             // Take photo's filename as objectname
             if ($object['type'] == $nsAair . 'Photo') {
-                $objectUri = 'http://xodx.local/xodx/object/' . $object['fileName'] . '/';
+                $objectUri = $this->_app->getBaseUri() .'?c=media&a=get&mediaId=' . 
+                	$object['fileName'];
             } else {
-                $objectUri = 'http://xodx.local/xodx/object/' . md5(rand()) . '/';
+                $objectUri = $this->_app->getBaseUri() . 'xodx/object/' . md5(rand());
             }
         }
 
@@ -145,34 +147,41 @@ class Xodx_ActivityController extends Xodx_Controller
                         'value' => $actContent
                     ),
                 )
-            );
+        	);
+            // Triples of photo object
             if ($object['type'] == $nsAair . 'Photo') {
-                $activity[$objectUri] = array(
-                    $nsSioc . 'URL' => array(
-                        array(
-                            'type' => 'uri',
-                            'value' => $this->_app->getBaseUri() . $object['fileName']
-                        )
-                    ),
-                    $nsSioc . 'mimeType' => array(
-                        array(
-                            'type' => 'uri',
-                            'value' => $object['mimeType']
-                        )
-                    ),
-                );
+	            $activity[$objectUri][$nsAair . 'largerImage'][0]['type'] = 'uri';
+	            $activity[$objectUri][$nsAair . 'largerImage'][0]['value'] =
+	            	$this->_app->getBaseUri() . $object['fileName'];	                        	
+	            $activity[$objectUri][$nsSioc . 'mimeType'][0]['type'] = 'uri';
+	            $activity[$objectUri][$nsSioc . 'mimeType'][0]['value'] = $object['mimeType'];
             }
-        }
+        // Triples of Bookmark object
+            if ($object['type'] == $nsAair . 'Bookmark') {
+				$activitiy[$objectUri][$nsAair . 'targetURL'][0]['type'] = 'literal';
+				$activitiy[$objectUri][$nsAair . 'targetURL'][0]['value'] =
+					$this->_app->getBaseUri() . $object['content'];
+            }	
+            // Adding user text about photo/bookmark
+            if (
+                ($object['type'] == $nsAair . 'Photo' || $object['type'] == $nsAair . 'Bookmark') &&
+                !empty($object['about'])
+            ) {
+	            $activity[$objectUri][$nsAair . 'content'][0]['type'] = 'literal';
+	            $activity[$objectUri][$nsAair . 'content'][0]['value'] = $object['about'];            	
+            }
+
         $store->addMultipleStatements($graphUri, $activity);
 
         $pushController = new Xodx_PushController($this->_app);
-        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
+        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . htmlentities($actorUri);
 
         $pushController->publish($feedUri);
 
         return $feedUri . "\n" . var_export($activity, true);
+        }
     }
-
+    
     /**
      * This method adds multiple activities to the store
      * @param $activities is an array of Xodx_Activity objects
@@ -187,50 +196,6 @@ class Xodx_ActivityController extends Xodx_Controller
 
         foreach ($activities as $activity) {
             $store->addMultipleStatements($graphUri, $activity->toGraphArray());
-        }
-    }
-
-    /**
-    * This method uploads an image file after using an upload form
-    * @param $fileName the name.ext of the file posted
-    * @return Array with 'fileId' and 'mimeType'
-    */
-    private function _uploadImage($fieldName)
-    {
-        $uploadDir = '/var/www/xodx/raw/';
-        $checkFile = basename($_FILES[$fieldName]['name']);
-        $pathParts = pathinfo($checkFile);
-
-        // Check if file's MIME-Type is an image
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $checkType = finfo_file($finfo, $_FILES[$fieldName]['tmp_name']);
-        $allowedTypes = array(
-            'image/png',
-            'image/jpeg',
-            'image/gif',
-            'image/tiff',
-            'image/x-ms-bmp',
-            'image/x-bmp',
-            'image/bmp',
-        );
-
-        if (!in_array($checkType, $allowedTypes)) {
-            throw new Exception('Unsupported MIME-Type: ' . $checkType);
-            return false;
-        }
-
-        $uploadFile = md5(rand());
-        $uploadPath = $uploadDir . $uploadFile;
-
-        // Upload File
-        if (move_uploaded_file($_FILES[$fieldName]['tmp_name'], $uploadPath)) {
-            $return = array (
-                'fileId' => $uploadFile,
-                'mimeType' => $checkType
-            );
-            return $return;
-        } else {
-            throw new Exception('Could not move uploaded file to upload directory: ' . $uploadPath);
         }
     }
 }
