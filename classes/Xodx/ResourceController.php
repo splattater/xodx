@@ -3,29 +3,7 @@
 require_once 'Tools.php';
 
 class Xodx_ResourceController extends Xodx_Controller
-{
-    public function listAction($template)
-    {
-        $model = $this->_app->getBootstrap()->getResource('Model');
-
-        $profiles = $model->sparqlQuery(
-            'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' . 
-            'SELECT ?profile ?person ?name ' . 
-            'WHERE { ' .
-            '   ?profile a foaf:PersonalProfileDocument . ' .
-            '   ?profile foaf:primaryTopic ?person . ' .
-            '   ?person foaf:name ?name . ' .
-            '}'
-        );
-
-        $template->profilelistList = $profiles;
-        $template->addContent('templates/profilelist.phtml');
-
-        $template->addDebug(var_export($profiles, true));
-
-        return $template;
-    }
-
+{   
     public function showAction($template)
     {
         $bootstrap = $this->_app->getBootstrap();
@@ -33,7 +11,7 @@ class Xodx_ResourceController extends Xodx_Controller
         $request = $bootstrap->getResource('request');
 
         // get URI
-        $objectUri = $request->getValue('mediaId', 'get');
+        $objectUri = $request->getValue('objectId', 'get');
 
         $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsAair = 'http://xmlns.notu.be/aair#';
@@ -48,14 +26,6 @@ class Xodx_ResourceController extends Xodx_Controller
         	'   OPTIONAL {<' . $objectUri . '> aair:targetURL ?link .} ' .
             '}';
 
-/**        // TODO deal with language tags
-        $contactsQuery = 'PREFIX foaf: <' . $nsFoaf . '> ' . 
-            'SELECT ?contactUri ?name ' . 
-            'WHERE { ' .
-            '   <' . $personUri . '> foaf:knows ?contactUri . ' .
-            '   OPTIONAL {?contactUri foaf:name ?name .} ' .
-            '}';
-*/
         $object = $model->sparqlQuery($objectQuery);
 
         if (count($object) < 1) {
