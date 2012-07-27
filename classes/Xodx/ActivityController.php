@@ -74,10 +74,11 @@ class Xodx_ActivityController extends Xodx_Controller
         } else {
             // Take photo's filename as objectname
             if ($object['type'] == $nsAair . 'Photo') {
-                $objectUri = $this->_app->getBaseUri() .'?c=media&a=get&mediaId=' . 
+                $objectUri = $this->_app->getBaseUri() .'?c=resource&a=get&objectId=' . 
                 	$object['fileName'];
             } else {
-                $objectUri = $this->_app->getBaseUri() . 'xodx/object/' . md5(rand());
+                $objectUri = $this->_app->getBaseUri() . 
+                	'?c=resource&a=get&objectId=' . md5(rand());
             }
         }
 
@@ -197,5 +198,83 @@ class Xodx_ActivityController extends Xodx_Controller
         foreach ($activities as $activity) {
             $store->addMultipleStatements($graphUri, $activity->toGraphArray());
         }
+    }
+    
+	/** 
+	 * @param $personUri the uri of the person whoes activities should be returned
+     * @return an array of activities
+     * TODO return an array of Xodx_Activity objects
+     * TODO getActivity by objectURI
+     */
+    public function getActivities ($personUri)
+    {
+        // There are two namespaces, one is used in atom files the other one for RDF
+        $nsAairAtom = 'http://activitystrea.ms/schema/1.0/';
+        $nsAair = 'http://xmlns.notu.be/aair#';
+
+        $model = $this->_app->getBootstrap()->getResource('model');
+
+        if ($personUri === null) {
+            return null;
+        }
+
+        $query = '' .
+            'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
+            'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
+            'SELECT ?activity ?date ?verb ?object ' .
+            'WHERE { ' .
+            '   ?activity a                   aair:Activity ; ' .
+            '             aair:activityActor  <' . $personUri . '> ; ' .
+            '             atom:published      ?date ; ' .
+            '             aair:activityVerb   ?verb ; ' .
+            '             aair:activityObject ?object . ' .
+            '} ' .
+            'ORDER BY DESC(?date)';
+        $activitiesResult = $model->sparqlQuery($query);
+
+        $activities = array();
+
+        foreach ($activitiesResult as $activity) {
+            $activityUri = $activity['activity'];
+            $verbUri = $activity['verb'];
+            $objectUri = $activity['object'];
+
+            $activity['date'] = self::_issueE24fix($activity['date']);
+
+            $activity = array(
+                'title' => '"' . $personUri . '" did "' . $activity['verb'] . '".',
+                'uri' => $activityUri,
+                'author' => 'Natanael',
+                'authorUri' => $personUri,
+                'pubDate' => $activity['date'],
+                'verb' => $activity['verb'],
+                'object' => $activity['object'],
+            );
+
+            if ($verbUri == $nsAair . 'Post') {
+                $objectResult = $model->sparqlQuery(
+                    'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
+                    'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
+                    'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
+                    'SELECT ?type ?content ?date ' .
+                    'WHERE { ' .
+                    '   <' . $objectUri . '> a ?type ; ' .
+                    '        sioc:created_at ?date ; ' .
+                    '        aair:content ?content . ' .
+                    '} '
+                );
+
+                if (count($objectResult) > 0) {
+                    $activity['objectType'] = $objectResult[0]['type'];
+                    $activity['objectPubDate'] = self::_issueE24fix($objectResult[0]['date']);
+                    $activity['objectContent'] = $objectResult[0]['content'];
+                }
+            } else {
+            }
+
+            $activities[] = $activity;
+        }
+
+        return $activities;
     }
 }
