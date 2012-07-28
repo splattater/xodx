@@ -10,8 +10,7 @@ class Xodx_ResourceController extends Xodx_Controller
         $model = $bootstrap->getResource('model');
         $request = $bootstrap->getResource('request');
 
-        // get URI
-        $objectUri = $request->getValue('objectId', 'get');
+        $objectUri = 'http://xodx/object/' . $request->getValue('objectId', 'get');
 
         $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsAair = 'http://xmlns.notu.be/aair#';
@@ -19,7 +18,7 @@ class Xodx_ResourceController extends Xodx_Controller
         $objectQuery = 'PREFIX aair: <' . $nsAair. '> ' . 
             'SELECT ?type ?content ?image ?link ' . 
             'WHERE { ' .
-            '   <' . $objectUri . '> a aair:Activity . ' .
+            '   <' . $objectUri . '> a ?type . ' .
             '   OPTIONAL {<' . $objectUri . '> aair:largerImage ?image .} ' .
             '   OPTIONAL {<' . $objectUri . '> aair:type ?type .} ' .
             '   OPTIONAL {<' . $objectUri . '> aair:content ?content .} ' .
@@ -27,7 +26,7 @@ class Xodx_ResourceController extends Xodx_Controller
             '}';
 
         $object = $model->sparqlQuery($objectQuery);
-
+		var_dump($object);
         if (count($object) < 1) {
             $newStatements = Tools::getLinkedDataResource($objectUri);
             if ($newStatements !== null) {
@@ -47,19 +46,21 @@ class Xodx_ResourceController extends Xodx_Controller
                 );
             }
         }
-		// TODO getActivity with objectURI from Xodx_ActivityController
+/**		// TODO getActivity with objectURI from Xodx_ActivityController
         $personController = new Xodx_PersonController($this->_app);
         $activities = $personController->getActivities($personUri);
         $news = $personController->getNotifications($personUri);
-
-        $template->profileshowPersonUri = $personUri;
-        $template->resourceshowImage = $object[0]['image'];
-        $template->profileshowName = $object[0]['type'];
-        $template->profileshowNick = $object[0]['nick'];
-        $template->resourceshowActivities = $activities;
-        $template->profileshowKnows = $knows;
-        $template->profileshowNews = $news;
-        $template->addContent('templates/profileshow.phtml');
+*/
+        $template->resourceshowObjectUri = $objectUri;
+        if (!empty($object[0]['image']))
+        	$template->resourceshowImage = $object[0]['image'];
+        if (!empty($object[0]['type']))
+        	$template->resourceshowName = $object[0]['type'];
+    	if (!empty($object[0]['content']))
+        	$template->resourceshowContent = $object[0]['content'];
+        if (!empty($object[0]['content']))
+        	$template->resourceshowContent = $object[0]['content'];
+        $template->addContent('templates/resourceshow.phtml');
 
         return $template;
     }
