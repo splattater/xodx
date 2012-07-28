@@ -1,9 +1,9 @@
 <h2>Resource</h2>
 <?php if(isset($this->resourceshowImage)) : ?> <img class="avatar size128" src="<?= $this->resourceshowImage ?>" /> <?php endif; ?>
 <div class="profile">
-    <h3><?= $this->profileshowName ?></h3>
-    <?php if(isset($this->profileshowNick)) : ?> <h4><?= $this->profileshowNick ?></h4> <?php endif; ?>
-    <h5>knows ...</h5>
+    <h3><?= $this->resourceshowObjectUri ?></h3>
+    <?php if(isset($this->resourceshowType)) : ?> <h5>Type: <?= $this->resourceshowType ?></h5> <?php endif; ?>
+    <?php if(isset($this->resourceshowContent)) : ?> <h5>Content: <?= $this->resourceshowContent ?></h5> <?php endif; ?>
     <h2>Activities</h2>
     <?php if (isset($this->resourceshowActivities)) : ?>
     <?php foreach ($this->resourceshowActivities as $activity) : ?>
@@ -35,52 +35,4 @@
         There are not Activities of this person
         </div>
     <?php endif; ?>
-    <h2>Add Activity ...</h2>
-        <th>Actor</th>
-            <?= $this->profileshowName ?>
-            <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
-        <ul class="nav nav-pills">
-            <li class="active"><a href="#status" data-toggle="tab">Status</a></li>
-            <li><a href="#link" data-toggle="tab">Link</a></li>
-            <li><a href="#photo" data-toggle="tab">Photo</a></li>
-        </ul>
-        <div class="tab-content">
-            <div class="tab-pane active" id="status">
-                <form method="post" action="?c=activity&a=addactivity">
-                    <textarea name="content"></textarea>
-                    <input type="hidden" name="verb" value="http://xmlns.notu.be/aair#Post"  >
-                    <input type="hidden" name="type" value="http://xmlns.notu.be/aair#Note" />
-                    <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
-                    <button class="btn btn-primary" type="submit">Post</button>
-                </form>
-            </div>
-            <div class="tab-pane" id="link">
-                <form method="post" action="?c=activity&a=addactivity">
-                    <input type="text" name="content" /></br>
-                    <textarea name="about"></textarea>
-                    <input type="hidden" name="verb" value="http://xmlns.notu.be/aair#Share" />
-                    <input type="hidden" name="type" value="http://xmlns.notu.be/aair#Bookmark" />
-                    <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
-                    <button class="btn btn-primary" type="submit">Share</button>
-                </form>
-            </div>
-            <div class="tab-pane" id="photo">
-                <form enctype="multipart/form-data" method="post" action="?c=activity&a=addactivity">
-                    <input type="hidden" name="MAX_FILE_SIZE" value="600000" />
-                    <input type="file" name="content"/></br>
-                    <textarea name="about"></textarea>
-                    <input type="hidden" name="verb" value="http://xmlns.notu.be/aair#Share" />
-                    <input type="hidden" name="type" value="http://xmlns.notu.be/aair#Photo" />
-                    <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
-                    <button class="btn btn-primary" type="submit">Share</button>
-                </form>
-            </div>
-        </div>
-    <a href="?c=feed&amp;a=getFeed&amp;uri=<?= htmlentities($this->profileshowPersonUri) ?>">Show Activity Feed</a>
-    <form method="post" action="?c=user&a=subscribe">
-        <div class="input-append">
-            <input type="hidden" name="user" value="<?= $this->profileshowPersonUri ?>" />
-            <input type="text" name="feeduri" /><button class="btn btn-primary" type="submit">Subscribe</button>
-        </div>
-    </form>
-</div>
+ </div>
