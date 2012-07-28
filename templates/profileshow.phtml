@@ -45,7 +45,7 @@ if ($contact['name'] != null) {
         did <a href="<?= htmlentities($activity['verb']) ?>"><?= htmlentities($activity['verb']) ?></a>
         <?php if (isset($activity['objectType'])) : ?>
 
-        a <a href="?c=resource&amp;=show&amp;objectUri=<?= htmlentities($activity['object']) ?>">
+        a <a href="?c=resource&amp;a=show&amp;objectUri=<?= htmlentities($activity['object']) ?>">
             <?= htmlentities($activity['object']) ?>
         </a>
         <?php endif; ?>
