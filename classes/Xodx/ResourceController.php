@@ -10,7 +10,7 @@ class Xodx_ResourceController extends Xodx_Controller
         $model = $bootstrap->getResource('model');
         $request = $bootstrap->getResource('request');
 
-        $objectUri = 'http://xodx/object/' . $request->getValue('objectId', 'get');
+        $objectUri = $request->getValue('objectUri', 'get');
 
         $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsAair = 'http://xmlns.notu.be/aair#';
@@ -55,7 +55,7 @@ class Xodx_ResourceController extends Xodx_Controller
         if (!empty($object[0]['image']))
         	$template->resourceshowImage = $object[0]['image'];
         if (!empty($object[0]['type']))
-        	$template->resourceshowName = $object[0]['type'];
+        	$template->resourceshowType = $object[0]['type'];
     	if (!empty($object[0]['content']))
         	$template->resourceshowContent = $object[0]['content'];
         if (!empty($object[0]['content']))
