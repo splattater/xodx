@@ -74,11 +74,10 @@ class Xodx_ActivityController extends Xodx_Controller
         } else {
             // Take photo's filename as objectname
             if ($object['type'] == $nsAair . 'Photo') {
-                $objectUri = $this->_app->getBaseUri() .'?c=resource&a=get&objectId=' . 
-                	$object['fileName'];
+                $objectUri = 'http:///xodx/object/' .	$object['fileName'];
             } else {
                 $objectUri = $this->_app->getBaseUri() . 
-                	'?c=resource&a=get&objectId=' . md5(rand());
+                	'http:///xodx/object/' . md5(rand());
             }
         }
 
