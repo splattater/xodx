@@ -14,19 +14,22 @@ class Xodx_ResourceController extends Xodx_Controller
 
         $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsAair = 'http://xmlns.notu.be/aair#';
+        $nsXodx = 'http://xodx/ns#';
 
         $objectQuery = 'PREFIX aair: <' . $nsAair. '> ' . 
-            'SELECT ?type ?content ?image ?link ' . 
+        	'xodx: <' . $nsXodx. '> ' .
+            'SELECT ?type ?content ?image ?link ?mimeType' . 
             'WHERE { ' .
             '   <' . $objectUri . '> a ?type . ' .
             '   OPTIONAL {<' . $objectUri . '> aair:largerImage ?image .} ' .
             '   OPTIONAL {<' . $objectUri . '> aair:type ?type .} ' .
             '   OPTIONAL {<' . $objectUri . '> aair:content ?content .} ' .
         	'   OPTIONAL {<' . $objectUri . '> aair:targetURL ?link .} ' .
+        	'   OPTIONAL {<' . $objectUri . '> xodx:mimeType ?mimeType .} ' .
             '}';
 
         $object = $model->sparqlQuery($objectQuery);
-		var_dump($object);
+		var_dump($object);c35919c711e8a00485f40d068de14e3e;
         if (count($object) < 1) {
             $newStatements = Tools::getLinkedDataResource($objectUri);
             if ($newStatements !== null) {
@@ -41,7 +44,8 @@ class Xodx_ResourceController extends Xodx_Controller
                 $object[0] = array(
                     'type' => $modelNew->getValue($objectUri, $nsAair . 'type'),
                     'content' => $modelNew->getValue($objectUri, $nsAair . 'content'),
-                    'image' => $modelNew->getValue($objectUri, $nsAair . 'image'),
+                    'image' => $modelNew->getValue($objectUri, $nsAair . 'image') . 
+                		$modelNew->getValue($objectUri, $nsXodx . 'mimeType'),
                 	'link' => $modelNew->getValue($objectUri, $nsAair . 'link'),
                 );
             }
