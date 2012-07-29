@@ -17,7 +17,7 @@ class Xodx_ResourceController extends Xodx_Controller
         $nsXodx = 'http://xodx/ns#';
 
         $objectQuery = 'PREFIX aair: <' . $nsAair. '> ' . 
-        	'xodx: <' . $nsXodx. '> ' .
+        	'PREFIX xodx: <' . $nsXodx. '> ' .
             'SELECT ?type ?content ?image ?link ?mimeType' . 
             'WHERE { ' .
             '   <' . $objectUri . '> a ?type . ' .
@@ -29,7 +29,7 @@ class Xodx_ResourceController extends Xodx_Controller
             '}';
 
         $object = $model->sparqlQuery($objectQuery);
-		var_dump($object);c35919c711e8a00485f40d068de14e3e;
+		var_dump($object);
         if (count($object) < 1) {
             $newStatements = Tools::getLinkedDataResource($objectUri);
             if ($newStatements !== null) {
