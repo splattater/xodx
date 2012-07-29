@@ -1,5 +1,6 @@
 <h2>Resource</h2>
-<?php if(isset($this->resourceshowImage)) : ?> <img class="avatar size128" src="<?= $this->resourceshowImage ?>" /> <?php endif; ?>
+<?php if(!empty($this->resourceshowImage)) : ?> <img class="avatar size128" src="
+	?c=media&amp;a=get&amp;imageId=<?= $this->resourceshowImage ?>" /> <?php endif; ?>
 <div class="profile">
     <h3><?= $this->resourceshowObjectUri ?></h3>
     <?php if(isset($this->resourceshowType)) : ?> <h5>Type: <?= $this->resourceshowType ?></h5> <?php endif; ?>
