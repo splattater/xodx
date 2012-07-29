@@ -65,6 +65,7 @@ class Xodx_ActivityController extends Xodx_Controller
         $nsSioc = 'http://rdfs.org/sioc/ns#';
         $nsAtom = 'http://www.w3.org/2005/Atom/';
         $nsAair = 'http://xmlns.notu.be/aair#';
+        $nsXodx = 'http://xodx/ns#';
 
         $activityUri = 'http:///xodx/activity/' . md5(rand()) . '/';
         $now = date('c');
@@ -75,10 +76,10 @@ class Xodx_ActivityController extends Xodx_Controller
             // Take photo's filename as objectname
             if ($object['type'] == $nsAair . 'Photo') {
             	$objectId = $object['fileName'];
-                $objectUri = 'http://xodx/object/' .	$objectId;
+                $objectUri = 'http://xodx/resource/' .	$objectId;
             } else {
             	$objectId = md5(rand());
-                $objectUri = 'http://xodx/object/' . $objectId;
+                $objectUri = 'http://xodx/resource/' . $objectId;
             }
         }
 
@@ -152,16 +153,14 @@ class Xodx_ActivityController extends Xodx_Controller
             // Triples of photo object
             if ($object['type'] == $nsAair . 'Photo') {
 	            $activity[$objectUri][$nsAair . 'largerImage'][0]['type'] = 'uri';
-	            $activity[$objectUri][$nsAair . 'largerImage'][0]['value'] =
-	            	$this->_app->getBaseUri() . $object['fileName'];	                        	
-	            $activity[$objectUri][$nsSioc . 'mimeType'][0]['type'] = 'uri';
-	            $activity[$objectUri][$nsSioc . 'mimeType'][0]['value'] = $object['mimeType'];
+	            $activity[$objectUri][$nsAair . 'largerImage'][0]['value'] = $object['fileName'];	                        	
+	            $activity[$objectUri][$nsXodx . 'mimeType'][0]['type'] = 'uri';
+	            $activity[$objectUri][$nsXodx . 'mimeType'][0]['value'] = $object['mimeType'];
             }
         // Triples of Bookmark object
             if ($object['type'] == $nsAair . 'Bookmark') {
 				$activitiy[$objectUri][$nsAair . 'targetURL'][0]['type'] = 'literal';
-				$activitiy[$objectUri][$nsAair . 'targetURL'][0]['value'] =
-					$this->_app->getBaseUri() . $object['content'];
+				$activitiy[$objectUri][$nsAair . 'targetURL'][0]['value'] = $object['content'];
             }	
             // Adding user text about photo/bookmark
             if (
