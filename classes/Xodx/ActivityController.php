@@ -250,6 +250,7 @@ class Xodx_ActivityController extends Xodx_Controller
                 'object' => $activity['object'],
             );
 
+
             if ($verbUri == $nsAair . 'Post') {
                 $objectResult = $model->sparqlQuery(
                     'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
@@ -262,7 +263,7 @@ class Xodx_ActivityController extends Xodx_Controller
                     '        aair:content ?content . ' .
                     '} '
                 );
-
+                
                 if (count($objectResult) > 0) {
                     $activity['objectType'] = $objectResult[0]['type'];
                     $activity['objectPubDate'] = self::_issueE24fix($objectResult[0]['date']);
@@ -270,7 +271,7 @@ class Xodx_ActivityController extends Xodx_Controller
                 }
             } else {
             }
-
+            
             $activities[] = $activity;
         }
 
