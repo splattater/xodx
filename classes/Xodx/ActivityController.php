@@ -150,26 +150,26 @@ class Xodx_ActivityController extends Xodx_Controller
                         'value' => $actContent
                     ),
                 )
-        	);
+            );
             // Triples of photo object
             if ($object['type'] == $nsAair . 'Photo') {
-	            $activity[$objectUri][$nsAair . 'largerImage'][0]['type'] = 'literal';
-	            $activity[$objectUri][$nsAair . 'largerImage'][0]['value'] = $object['fileName'];	                        	
-	            $activity[$objectUri][$nsAair . 'mimeType'][0]['type'] = 'literal';
-	            $activity[$objectUri][$nsAair . 'mimeType'][0]['value'] = $object['mimeType'];
+                $activity[$objectUri][$nsAair . 'largerImage'][0]['type'] = 'literal';
+                $activity[$objectUri][$nsAair . 'largerImage'][0]['value'] = $object['fileName'];	                        	
+                $activity[$objectUri][$nsAair . 'mimeType'][0]['type'] = 'literal';
+                $activity[$objectUri][$nsAair . 'mimeType'][0]['value'] = $object['mimeType'];
             }
         // Triples of Bookmark object
             if ($object['type'] == $nsAair . 'Bookmark') {
-				$activitiy[$objectUri][$nsAair . 'targetURL'][0]['uri'] = 'literal';
-				$activitiy[$objectUri][$nsAair . 'targetURL'][0]['value'] = $object['content'];
+                $activity[$objectUri][$nsAair . 'targetURL'][0]['uri'] = 'literal';
+                $activity[$objectUri][$nsAair . 'targetURL'][0]['value'] = $object['content'];
             }	
             // Adding user text about photo/bookmark
             if (
                 ($object['type'] == $nsAair . 'Photo' || $object['type'] == $nsAair . 'Bookmark') &&
                 !empty($object['about'])
             ) {
-	            $activity[$objectUri][$nsAair . 'content'][0]['type'] = 'literal';
-	            $activity[$objectUri][$nsAair . 'content'][0]['value'] = $object['about'];            	
+                $activity[$objectUri][$nsAair . 'content'][0]['type'] = 'literal';
+                $activity[$objectUri][$nsAair . 'content'][0]['value'] = $object['about'];            	
             }
 
         $store->addMultipleStatements($graphUri, $activity);
@@ -184,7 +184,7 @@ class Xodx_ActivityController extends Xodx_Controller
         return $feedUri . "\n" . var_export($activity, true);
         }
     }
-    
+
     /**
      * This method adds multiple activities to the store
      * @param $activities is an array of Xodx_Activity objects
