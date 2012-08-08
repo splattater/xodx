@@ -4,6 +4,16 @@ $main_dir = rtrim(dirname(__FILE__), '/\\');
 $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off") ? "https" : "http";
 $base_uri =  $protocol . "://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']);
 
+// append trailing slash if not present
+if ($base_uri[strlen($base_uri) - 1] != '/') {
+    $base_uri .= '/';
+}
+
+if ($main_dir[strlen($main_dir) - 1] != '/') {
+    $main_dir .= '/';
+}
+>>>>>>> master
+
 # Set include paths
 $includePath  = get_include_path() . PATH_SEPARATOR;
 
