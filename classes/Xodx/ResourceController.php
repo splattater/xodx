@@ -3,7 +3,7 @@
 require_once 'Tools.php';
 
 class Xodx_ResourceController extends Xodx_Controller
-(
+{
     public function showAction($template)
     {
         $bootstrap = $this->_app->getBootstrap();
