@@ -68,19 +68,18 @@ class Xodx_ActivityController extends Xodx_Controller
         $nsAair = 'http://xmlns.notu.be/aair#';
         $nsXodx = 'http://xodx.org/ns#';
 
-        $activityUri = 'http:///xodx/activity/' . md5(rand()) . '/';
+        $activityUri = $this->_app->getBaseUri() . '?c=resource&a=show&activityId=' . md5(rand());
         $now = date('c');
-
         if ($object['type'] == 'uri') {
             $objectUri = $object['value'];
         } else {
             // Take photo's filename as objectname
             if ($object['type'] == $nsAair . 'Photo') {
             	$objectId = $object['fileName'];
-                $objectUri = $this->_app->getBaseUri() . 'resource/' .	$objectId;
+                $objectUri = $this->_app->getBaseUri() . '?c=resource&a=show&objectId=' .	$objectId;
             } else {
             	$objectId = md5(rand());
-                $objectUri = $this->_app->getBaseUri() . 'resource/' . $objectId;
+                $objectUri = $this->_app->getBaseUri() . '?c=resource&a=show&objectId=' . $objectId;
             }
         }
 
@@ -201,7 +200,7 @@ class Xodx_ActivityController extends Xodx_Controller
             $store->addMultipleStatements($graphUri, $activity->toGraphArray());
         }
     }
-    
+
 	/** 
 	 * @param $personUri the uri of the person whoes activities should be returned
      * @return an array of activities
@@ -265,8 +264,8 @@ class Xodx_ActivityController extends Xodx_Controller
                     '        sioc:created_at ?date ; ' .
                     '        aair:content ?content . ' .
                     '} '
-                );
-                
+                    );
+
                 if (count($objectResult) > 0) {
                     $activity['objectType'] = $objectResult[0]['type'];
                     $activity['objectPubDate'] = self::_issueE24fix($objectResult[0]['date']);
@@ -274,10 +273,10 @@ class Xodx_ActivityController extends Xodx_Controller
                 }
             } else {
             }
-            
+
             $activities[] = $activity;
         }
-		var_dump($activities);
+        var_dump($activities);
         return $activities;
     }
 }
