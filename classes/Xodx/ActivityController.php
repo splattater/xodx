@@ -68,7 +68,7 @@ class Xodx_ActivityController extends Xodx_Controller
         $nsAair = 'http://xmlns.notu.be/aair#';
         $nsXodx = 'http://xodx.org/ns#';
 
-        $activityUri = $this->_app->getBaseUri() . '?c=resource&a=show&activityId=' . md5(rand());
+        $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
         $now = date('c');
         if ($object['type'] == 'uri') {
             $objectUri = $object['value'];
@@ -76,10 +76,10 @@ class Xodx_ActivityController extends Xodx_Controller
             // Take photo's filename as objectname
             if ($object['type'] == $nsAair . 'Photo') {
             	$objectId = $object['fileName'];
-                $objectUri = $this->_app->getBaseUri() . '?c=resource&a=show&objectId=' .	$objectId;
+                $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' .	$objectId;
             } else {
             	$objectId = md5(rand());
-                $objectUri = $this->_app->getBaseUri() . '?c=resource&a=show&objectId=' . $objectId;
+                $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
             }
         }
 
@@ -153,7 +153,7 @@ class Xodx_ActivityController extends Xodx_Controller
             // Triples of photo object
             if ($object['type'] == $nsAair . 'Photo') {
                 $activity[$objectUri][$nsAair . 'largerImage'][0]['type'] = 'literal';
-                $activity[$objectUri][$nsAair . 'largerImage'][0]['value'] = $object['fileName'];	                        	
+                $activity[$objectUri][$nsAair . 'largerImage'][0]['value'] = $object['fileName'];
                 $activity[$objectUri][$nsAair . 'mimeType'][0]['type'] = 'literal';
                 $activity[$objectUri][$nsAair . 'mimeType'][0]['value'] = $object['mimeType'];
             }
@@ -161,14 +161,14 @@ class Xodx_ActivityController extends Xodx_Controller
             if ($object['type'] == $nsAair . 'Bookmark') {
                 $activity[$objectUri][$nsAair . 'targetURL'][0]['uri'] = 'literal';
                 $activity[$objectUri][$nsAair . 'targetURL'][0]['value'] = $object['content'];
-            }	
+            }
             // Adding user text about photo/bookmark
             if (
                 ($object['type'] == $nsAair . 'Photo' || $object['type'] == $nsAair . 'Bookmark') &&
                 !empty($object['about'])
             ) {
                 $activity[$objectUri][$nsAair . 'content'][0]['type'] = 'literal';
-                $activity[$objectUri][$nsAair . 'content'][0]['value'] = $object['about'];            	
+                $activity[$objectUri][$nsAair . 'content'][0]['value'] = $object['about'];
             }
 
         $store->addMultipleStatements($graphUri, $activity);
@@ -201,7 +201,7 @@ class Xodx_ActivityController extends Xodx_Controller
         }
     }
 
-	/** 
+	/**
 	 * @param $personUri the uri of the person whoes activities should be returned
      * @return an array of activities
      * TODO return an array of Xodx_Activity objects
