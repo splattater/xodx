@@ -1,39 +1,11 @@
 <h2>Resource</h2>
-<?php if(!empty($this->resourceshowImage)) : ?> <img class="avatar size128" src="
-	?c=media&amp;a=get&amp;imageId=<?= $this->resourceshowImage ?>" /> <?php endif; ?>
-<div class="profile">
-    <h3><?= $this->resourceshowObjectUri ?></h3>
-    <?php if(isset($this->resourceshowType)) : ?> <h5>Type: <?= $this->resourceshowType ?></h5> <?php endif; ?>
-    <?php if(isset($this->resourceshowContent)) : ?> <h5>Content: <?= $this->resourceshowContent ?></h5> <?php endif; ?>
-    <h2>Activities</h2>
-    <?php if (isset($this->resourceshowActivities)) : ?>
-    <?php foreach ($this->resourceshowActivities as $activity) : ?>
-    <div class="activity">
-      <p>
-        <a href="<?= $activity['uri'] ?>"><strong><?= $activity['title'] ?></strong></a><br />
-        <em><?= $activity['pubDate'] ?></em>
-      </p>
-      <p>
-        <a href="<?= htmlentities($activity['authorUri']) ?>">
-            <?= htmlentities($activity['authorUri']) ?>
-        </a>
-        did <a href="<?= htmlentities($activity['verb']) ?>"><?= htmlentities($activity['verb']) ?></a>
-        <?php if (isset($activity['objectType'])) : ?>
-
-        an <a href="<?= htmlentities($activity['objectType']) ?>">
-            <?= htmlentities($activity['objectType']) ?>
-        </a>
-        <?php endif; ?>
-        : <a href="<?= htmlentities($activity['object']) ?>"><?= htmlentities($activity['object']) ?></a>
-        <?php if (isset($activity['objectContent'])) : ?>
-
-        <?= $activity['objectContent'] ?>
-        <?php endif; ?>
-    </div>
-    <?php endforeach; ?>
-    <?php else: ?>
-        <div class="well">
-        There are not Activities of this person
-        </div>
-    <?php endif; ?>
- </div>
+<table>
+<?php
+foreach ($this->properties as $property) {
+    echo '<tr>';
+    echo '<td>' . $property['p'] . '</td>';
+    echo '<td>' . $property['o'] . '</td>';
+    echo '</tr>';
+}
+?>
+</table>
