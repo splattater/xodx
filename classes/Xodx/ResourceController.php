@@ -34,6 +34,8 @@ class Xodx_ResourceController extends Xodx_Controller
             } else if (stristr($contentType[0], 'turtle')) {
                 header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=rdf&id=' . $objectId . '&format=turtle');
                 return $template;
+            } else if (stristr($contentType[0], 'image')) {
+                header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=img&id=' . $objectId);
             }
         }
         header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=show&id=' . $objectId);
@@ -121,5 +123,42 @@ class Xodx_ResourceController extends Xodx_Controller
 
         return $template;
 
+    }
+
+    /**
+     *
+     * rdfAction returns a serialized view of a resource according to content type
+     * (default is turtle)
+     * @param unknown_type $template
+     */
+    public function imgAction ($template)
+    {
+        $bootstrap = $this->_app->getBootstrap();
+        $model = $bootstrap->getResource('model');
+        $request = $bootstrap->getResource('request');
+
+        $objectId = $request->getValue('id', 'get');
+        $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+
+        $query = '' .
+            'PREFIX foaf <http://xmlns.com/foaf/spec/#> ' .
+            'PREFIX ov <http://open.vocab.org/docs/> ' .
+            'SELECT ?mime ' .
+            'WHERE { ' .
+            '   <' . $objectUri . '> a foaf:Image ; ' .
+            '   <' . $objectUri . '> ov:hasContentType ?mime . ' .
+            '} ';
+        $properties = $model->sparqlQuery($query);
+
+        $mediaController = $this->_app->getController('Xodx_MediaController');
+
+        $template->disableLayout();
+        $template->setRawContent('');
+
+        $mimeType = $properties['mime'];
+
+        $mediaController->getImage($objectId, $mimeType);
+        //$template->addContent('templates/resourceshow.phtml');
+        return $template;
     }
 }
