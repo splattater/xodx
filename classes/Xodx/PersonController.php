@@ -36,7 +36,10 @@ class Xodx_PersonController extends Xodx_Controller
         $pingbackController = $this->_app->getController('Xodx_PingbackController');
         $pingbackController->sendPing($personUri, $contactUri);
 
-        // TODO subscribe to contacts activity stream
+        // Subscribe user to feed of activityObject (photo, post, note)
+        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
+        $userController = $this->_app->getController('Xodx_UserController');
+        $userController->subscribeToFeed($actorUri, $feedUri);
     }
 
     public function addFriendRequest ($personUri, $contactUri)
