@@ -61,13 +61,14 @@ class Xodx_ActivityController extends Xodx_Controller
         $config = $bootstrap->getResource('config');
         $graphUri = $model->getModelIri();
 
-        $nsXsd = 'http://www.w3.org/2001/XMLSchema#';
+        $nsXsd = 'http://www.w3.org/2001/XMLSchema#';'PREFIX foaf <http://xmlns.com/foaf/spec/#> ' .
         $nsRdf = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
         $nsSioc = 'http://rdfs.org/sioc/ns#';
         $nsAtom = 'http://www.w3.org/2005/Atom/';
         $nsAair = 'http://xmlns.notu.be/aair#';
         $nsXodx = 'http://xodx.org/ns#';
         $nsFoaf = 'http://xmlns.com/foaf/spec/#';
+        $nsOv = 'http://open.vocab.org/docs/';
 
         $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
         $now = date('c');
@@ -151,20 +152,14 @@ class Xodx_ActivityController extends Xodx_Controller
                         'type' => 'uri',
                         'value' => $actorUri
                     )
-                ),
-                $nsFoaf . 'topic' => array(
-                    array(
-                        'type' => 'literal',
-                        'value' => $actContent
-                    ),
                 )
             );
             // Triples of photo object
             if ($type == 'Photo') {
                 $activity[$objectUri][$nsFoaf . 'Image'][0]['type'] = 'literal';
                 $activity[$objectUri][$nsFoaf . 'Image'][0]['value'] = $object['fileName'];
-                $activity[$objectUri][$nsAair . 'mimeType'][0]['type'] = 'literal';
-                $activity[$objectUri][$nsAair . 'mimeType'][0]['value'] = $object['mimeType'];
+                $activity[$objectUri][$nsOv . 'hasContentType'][0]['type'] = 'literal';
+                $activity[$objectUri][$nsOv . 'hasContentType'][0]['value'] = $object['mimeType'];
             }
         // Triples of Bookmark object
             if ($type == 'Bookmark') {
@@ -178,6 +173,9 @@ class Xodx_ActivityController extends Xodx_Controller
             ) {
                 $activity[$objectUri][$nsFoaf . 'topic'][0]['type'] = 'literal';
                 $activity[$objectUri][$nsFoaf . 'topic'][0]['value'] = $object['about'];
+            } else {
+                $activity[$objectUri][$nsFoaf . 'topic'][0]['type'] = 'literal';
+                $activity[$objectUri][$nsFoaf . 'topic'][0]['value'] = $actContent;
             }
 
         $store->addMultipleStatements($graphUri, $activity);
@@ -191,6 +189,8 @@ class Xodx_ActivityController extends Xodx_Controller
 
         // Subscribe user to feed of activityObject (photo, post, note)
         $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
+        echo '$feedUri: ' . $feedUri;
+        echo '$actorUri: ' . $actorUri;
         $userController = $this->_app->getController('Xodx_UserController');
         $actorUri = urldecode($actorUri);
 
