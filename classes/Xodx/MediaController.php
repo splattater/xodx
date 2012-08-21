@@ -46,7 +46,7 @@ class Xodx_MediaController extends Xodx_Controller
         return $template;
     }
 
-    
+
 
     /**
     * This method uploads an image file after using an upload form
@@ -56,12 +56,14 @@ class Xodx_MediaController extends Xodx_Controller
     public function uploadImage($fieldName)
     {
 		$bootstrap = $this->_app->getBootstrap();
-        
+
 		$request = $bootstrap->getResource('request');
-    	
+
 		$uploadDir = '/var/www/xodx/raw/';
         $checkFile = basename($_FILES[$fieldName]['name']);
         $pathParts = pathinfo($checkFile);
+        $tmpFile = $_FILES[$fieldName]['name'];
+        $fileExt = substr($tmpFile, strpos($tmpFile,'.'));
 
         // Check if file's MIME-Type is an image
         var_dump($_FILES);
@@ -83,7 +85,7 @@ class Xodx_MediaController extends Xodx_Controller
         }
 
         $uploadFile = md5(rand());
-        $uploadPath = $uploadDir . $uploadFile;
+        $uploadPath = $uploadDir . $uploadFile . $fileExt;
 
         // Upload File
         if (move_uploaded_file($_FILES[$fieldName]['tmp_name'], $uploadPath)) {
