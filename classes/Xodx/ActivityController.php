@@ -180,6 +180,11 @@ class Xodx_ActivityController extends Xodx_Controller
             $pushController->publish($feedUri);
         }
 
+        // Subscribe user to feed of activityObject (photo, post, note)
+        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
+        $userController = $this->_app->getController('Xodx_UserController');
+        $userController->subscribeToFeed($actorUri, $feedUri);
+
         return $feedUri . "\n" . var_export($activity, true);
         }
     }
