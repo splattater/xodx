@@ -38,8 +38,9 @@ class Xodx_PersonController extends Xodx_Controller
 
         // Subscribe user to feed of activityObject (photo, post, note)
         $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
+        $personUri = urlencode($personUri);
         $userController = $this->_app->getController('Xodx_UserController');
-        $userController->subscribeToFeed($actorUri, $feedUri);
+        $userController->subscribeToFeed($personUri, $feedUri);
     }
 
     public function addFriendRequest ($personUri, $contactUri)
