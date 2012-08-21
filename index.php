@@ -12,7 +12,6 @@ if ($base_uri[strlen($base_uri) - 1] != '/') {
 if ($main_dir[strlen($main_dir) - 1] != '/') {
     $main_dir .= '/';
 }
->>>>>>> master
 
 # Set include paths
 $includePath  = get_include_path() . PATH_SEPARATOR;
