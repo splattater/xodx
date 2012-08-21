@@ -4,6 +4,12 @@ require_once 'Tools.php';
 
 class Xodx_ResourceController extends Xodx_Controller
 {
+    /**
+     *
+     * indexAction decides to show a html or a serialized
+     * view of a resource if no action is given
+     * @param unknown_type $template
+     */
     public function indexAction($template)
     {
         $bootstrap = $this->_app->getBootstrap();
@@ -33,7 +39,11 @@ class Xodx_ResourceController extends Xodx_Controller
         header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=show&id=' . $objectId);
         return $template;
     }
-
+    /**
+     *
+     * Method returns all tuples of a resource to html template
+     * @param $template
+     */
     public function showAction($template)
     {
         $bootstrap = $this->_app->getBootstrap();
@@ -61,6 +71,12 @@ class Xodx_ResourceController extends Xodx_Controller
         return $template;
     }
 
+    /**
+     *
+     * rdfAction returns a serialized view of a resource according to content type
+     * (default is turtle)
+     * @param unknown_type $template
+     */
     public function rdfAction ($template)
     {
         $bootstrap = $this->_app->getBootstrap();
@@ -89,6 +105,9 @@ class Xodx_ResourceController extends Xodx_Controller
                 $contentType = 'application/x-turtle';
                 $filename .= '.ttl';
                 break;
+            default:
+                $contentType = 'application/x-turtle';
+                $filename .= '.ttl';
         }
 
         $modelUri = $model->getModelIri();
