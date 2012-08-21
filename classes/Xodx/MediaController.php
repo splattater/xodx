@@ -14,31 +14,31 @@ class Xodx_MediaController extends Xodx_Controller
 
         switch ($actTypeUri) {
             case 'http://xmlns.notu.be/aair#Note';
-                $object = array(
+            $object = array(
                     'type' => $actTypeUri,
                     'content' => $actContent,
-                );
-                $debugStr = $this->addActivity($actorUri, $verbUri, $object);
+            );
+            $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
             case 'http://xmlns.notu.be/aair#Link';
-                $object = array(
+            $object = array(
                     'type' => $actTypeUri,
                     'about' => $request->getValue('about', 'post'),
                     'content' => $actContent,
-                );
-                $debugStr = $this->addActivity($actorUri, $verbUri, $object);
+            );
+            $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
             case 'http://xmlns.notu.be/aair#Photo';
-                $fieldName = 'content';
-                $fileInfo = $this->_uploadImage($fieldName);
-                $object = array(
+            $fieldName = 'content';
+            $fileInfo = $this->_uploadImage($fieldName);
+            $object = array(
                     'type' => $actTypeUri,
                     'about' => $request->getValue('about', 'post'),
                     'content' => $actContent,
                     'fileName' => $fileInfo['fileId'],
                     'mimeType' => $fileInfo['mimeType'],
-                );
-                $debugStr = $this->addActivity($actorUri, $verbUri, $object);
+            );
+            $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
         }
         $template->addDebug($debugStr);
@@ -49,21 +49,20 @@ class Xodx_MediaController extends Xodx_Controller
 
 
     /**
-    * This method uploads an image file after using an upload form
-    * @param $fileName the name.ext of the file posted
-    * @return Array with 'fileId' and 'mimeType'
-    */
+     * This method uploads an image file after using an upload form
+     * @param $fileName the name.ext of the file posted
+     * @return Array with 'fileId' and 'mimeType'
+     */
     public function uploadImage($fieldName)
     {
-		$bootstrap = $this->_app->getBootstrap();
+        $bootstrap = $this->_app->getBootstrap();
 
-		$request = $bootstrap->getResource('request');
+        $request = $bootstrap->getResource('request');
 
-		$uploadDir = '/var/www/xodx/raw/';
+        $uploadDir = $this->_app->getBaseDir() . 'raw/';
         $checkFile = basename($_FILES[$fieldName]['name']);
         $pathParts = pathinfo($checkFile);
         $tmpFile = $_FILES[$fieldName]['name'];
-        $fileExt = substr($tmpFile, strpos($tmpFile,'.'));
 
         // Check if file's MIME-Type is an image
         var_dump($_FILES);
@@ -85,7 +84,7 @@ class Xodx_MediaController extends Xodx_Controller
         }
 
         $uploadFile = md5(rand());
-        $uploadPath = $uploadDir . $uploadFile . $fileExt;
+        $uploadPath = $uploadDir . $uploadFile;// . $fileExt;
 
         // Upload File
         if (move_uploaded_file($_FILES[$fieldName]['tmp_name'], $uploadPath)) {
@@ -97,5 +96,12 @@ class Xodx_MediaController extends Xodx_Controller
         } else {
             throw new Exception('Could not move uploaded file to upload directory: ' . $uploadPath);
         }
+    }
+
+    public function getImage($objectId, $mimeType)
+    {
+        header('Content-Type: ' . $mimeType);
+        $dir = $this->_app->getBaseDir() . 'raw/';
+        readfile($dir . $objectId);
     }
 }
