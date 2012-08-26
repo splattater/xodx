@@ -6,6 +6,15 @@ foreach ($this->properties as $property) {
     echo '<td>' . $property['p'] . '</td>';
     echo '<td>' . $property['o'] . '</td>';
     echo '</tr>';
+
+    if ($property['p'] == 'http://xmlns.com/foaf/spec/#Image') {
+        $id = $property['o'];
+    }
 }
 ?>
+
 </table>
+
+<?php if (isset($id)) :?>
+<img src="?c=resource&amp;id=<?= $id ?>" />
+<?php endif;?>
