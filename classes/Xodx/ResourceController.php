@@ -26,7 +26,6 @@ class Xodx_ResourceController extends Xodx_Controller
             if (stristr($contentType[0], 'html')) {
                 //redirect to show action
                 break;
-
             } else if (stristr($contentType[0], 'rdf')) {
                 //redirect to rdf action
                 header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=rdf&id=' . $objectId . '&format=rdfxml');
@@ -36,6 +35,7 @@ class Xodx_ResourceController extends Xodx_Controller
                 return $template;
             } else if (stristr($contentType[0], 'image')) {
                 header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=img&id=' . $objectId);
+                return $template;
             }
         }
         header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=show&id=' . $objectId);
@@ -141,21 +141,20 @@ class Xodx_ResourceController extends Xodx_Controller
         $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
 
         $query = '' .
-            'PREFIX foaf <http://xmlns.com/foaf/spec/#> ' .
-            'PREFIX ov <http://open.vocab.org/docs/> ' .
+            'PREFIX foaf: <http://xmlns.com/foaf/spec/#> ' .
+            'PREFIX ov: <http://open.vocab.org/docs/> ' .
             'SELECT ?mime ' .
             'WHERE { ' .
             '   <' . $objectUri . '> a foaf:Image ; ' .
-            '   <' . $objectUri . '> ov:hasContentType ?mime . ' .
+            '		ov:hasContentType ?mime . ' .
             '} ';
         $properties = $model->sparqlQuery($query);
-
         $mediaController = $this->_app->getController('Xodx_MediaController');
 
         $template->disableLayout();
         $template->setRawContent('');
 
-        $mimeType = $properties['mime'];
+        $mimeType = $properties[0]['mime'];
 
         $mediaController->getImage($objectId, $mimeType);
         //$template->addContent('templates/resourceshow.phtml');
