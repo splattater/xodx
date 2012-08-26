@@ -68,6 +68,7 @@ class Xodx_MediaController extends Xodx_Controller
         var_dump($_FILES);
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $checkType = finfo_file($finfo, $_FILES[$fieldName]['tmp_name']);
+        finfo_close($finfo);
         $allowedTypes = array(
             'image/png',
             'image/jpeg',
