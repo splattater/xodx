@@ -14,7 +14,7 @@ if ($contact['name'] != null) {
     $name = $contact['contactUri'];
 }
 ?>
-        <li><a href="?c=profile&amp;a=show&amp;person=<?= htmlentities($contact['contactUri']) ?>"><?= $name ?></a></li>
+        <li><a href="?c=profile&amp;a=show&amp;person=<?= urlencode($contact['contactUri']) ?>"><?= $name ?></a></li>
 <?php endforeach; ?>
         <li>
             <div class="input-append">
@@ -92,7 +92,6 @@ if ($contact['name'] != null) {
             </div>
             <div class="tab-pane" id="photo">
                 <form enctype="multipart/form-data" method="post" action="?c=activity&a=addactivity">
-                    <input type="hidden" name="MAX_FILE_SIZE" value="600000" />
                     <input type="file" name="content"/></br>
                     <textarea name="about"></textarea>
                     <input type="hidden" name="verb" value="Post" />
@@ -102,7 +101,7 @@ if ($contact['name'] != null) {
                 </form>
             </div>
         </div>
-    <a href="?c=feed&amp;a=getFeed&amp;uri=<?= htmlentities($this->profileshowPersonUri) ?>">Show Activity Feed</a>
+    <a href="?c=feed&amp;a=getFeed&amp;uri=<?= urlencode($this->profileshowPersonUri) ?>">Show Activity Feed</a>
     <form method="post" action="?c=user&a=subscribe">
         <div class="input-append">
             <input type="hidden" name="user" value="<?= $this->profileshowPersonUri ?>" />
