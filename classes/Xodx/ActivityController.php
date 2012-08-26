@@ -8,21 +8,32 @@ class Xodx_ActivityController extends Xodx_Controller
 
         $request = $bootstrap->getResource('request');
         $actorUri = $request->getValue('actor', 'post');
-        $verbUri = $request->getValue('verb', 'post');
-        $actTypeUri = $request->getValue('type', 'post');
+        $verb = $request->getValue('verb', 'post');
+        $actType = $request->getValue('type', 'post');
         $actContent = $request->getValue('content', 'post');
 
-        switch ($actTypeUri) {
+                $nsAair = 'http://xmlns.notu.be/aair#';
+
+        switch (strtolower($verb)) {
+            case 'post':
+                $verbUri = $nsAair . $verb;
+                break;
+            case 'share':
+                $verbUri = $nsAair . $verb;
+                break;
+        }
+
+        switch ($actType) {
             case 'Note';
                 $object = array(
-                    'type' => $actTypeUri,
+                    'type' => $actType,
                     'content' => $actContent,
                 );
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
             case 'Bookmark';
                 $object = array(
-                    'type' => $actTypeUri,
+                    'type' => $actType,
                     'about' => $request->getValue('about', 'post'),
                     'content' => $actContent,
                 );
@@ -33,7 +44,7 @@ class Xodx_ActivityController extends Xodx_Controller
                 $mediaController = new Xodx_MediaController($this->_app);
                 $fileInfo = $mediaController->uploadImage($fieldName);
                 $object = array(
-                    'type' => $actTypeUri,
+                    'type' => $actType,
                     'about' => $request->getValue('about', 'post'),
                     'content' => $actContent,
                     'fileName' => $fileInfo['fileId'],
@@ -42,6 +53,7 @@ class Xodx_ActivityController extends Xodx_Controller
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
         }
+        var_dump($object);
         $template->addDebug($debugStr);
 
         return $template;
@@ -60,7 +72,6 @@ class Xodx_ActivityController extends Xodx_Controller
         $model = $bootstrap->getResource('model');
         $config = $bootstrap->getResource('config');
         $graphUri = $model->getModelIri();
-
         $nsXsd = 'http://www.w3.org/2001/XMLSchema#';'PREFIX foaf <http://xmlns.com/foaf/spec/#> ' .
         $nsRdf = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
         $nsSioc = 'http://rdfs.org/sioc/ns#';
@@ -72,27 +83,24 @@ class Xodx_ActivityController extends Xodx_Controller
 
         $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
         $now = date('c');
-        if ($object['type'] == 'uri') {
-            $objectUri = $object['value'];
-        } else {
-            // Take photo's filename as objectname
-            if ($object['type'] == 'Photo') {
-            	$object['type'] = $nsFoaf . 'Document';
-            	$type = 'Photo';
-                $objectId = $object['fileName'];
-                $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' .	$objectId;
-            } else if ($object['type'] == 'Bookmark') {
-            	$object['type'] = $nsFoaf . 'Document';
-            	$type = 'Bookmark';
-                $objectId = md5(rand());
-                $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
-            } else if ($object['type'] == 'Note')
-                $object['type'] = $nsFoaf . 'Document';
-                $type = 'Note';
-                $objectId = md5(rand());
-                $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+        // Take photo's filename as objectname
+        if ($object['type'] == 'Photo') {
+            $object['type'] = $nsFoaf . 'Image';
+            $type = 'Photo';
+            $objectId = $object['fileName'];
+            $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' .	$objectId;
+        } else if ($object['type'] == 'Bookmark') {
+            $object['type'] = $nsFoaf . 'Document';
+            $type = 'Bookmark';
+            $objectId = md5(rand());
+            $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+        } else if ($object['type'] == 'Note') {
+            $object['type'] = $nsFoaf . 'Document';
+            $type = 'Note';
+            $objectId = md5(rand());
+            $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
         }
-
+        var_dump($object);
         $activity = array(
             $activityUri => array(
                 $nsRdf . 'type' => array(
@@ -156,14 +164,22 @@ class Xodx_ActivityController extends Xodx_Controller
             );
             // Triples of photo object
             if ($type == 'Photo') {
-                $activity[$objectUri][$nsFoaf . 'Image'][0]['type'] = 'literal';
-                $activity[$objectUri][$nsFoaf . 'Image'][0]['value'] = $object['fileName'];
-                $activity[$objectUri][$nsOv . 'hasContentType'][0]['type'] = 'literal';
-                $activity[$objectUri][$nsOv . 'hasContentType'][0]['value'] = $object['mimeType'];
+                $activity[$objectUri][$nsFoaf . 'Image'] = array(
+                    array(
+                        'type' => 'literal',
+                        'value' => $object['fileName'],
+                    )
+                );
+                $activity[$objectUri][$nsOv . 'hasContentType'] = array(
+                    array(
+                        'type' => 'literal',
+                        'value' => $object['mimeType'],
+                    )
+                );
             }
         // Triples of Bookmark object
             if ($type == 'Bookmark') {
-                $activity[$objectUri][$nsAair . 'targetURL'][0]['uri'] = 'literal';
+                $activity[$objectUri][$nsAair . 'targetURL'][0]['type'] = 'literal';
                 $activity[$objectUri][$nsAair . 'targetURL'][0]['value'] = $object['content'];
             }
             // Adding user text about photo/bookmark
