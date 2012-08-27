@@ -53,7 +53,6 @@ class Xodx_ActivityController extends Xodx_Controller
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
         }
-        var_dump($object);
         $template->addDebug($debugStr);
 
         return $template;
@@ -83,25 +82,28 @@ class Xodx_ActivityController extends Xodx_Controller
 
         $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
         $now = date('c');
+        $postId = md5(rand());
+        $postUri = $nsXodx . '?c=resource&id=' . $postId;
         // Take photo's filename as objectname
         if ($object['type'] == 'Photo') {
             $object['type'] = $nsFoaf . 'Image';
             $type = 'Photo';
             $objectId = $object['fileName'];
-            $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' .	$objectId;
+            $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
         } else if ($object['type'] == 'Bookmark') {
             $object['type'] = $nsFoaf . 'Document';
             $type = 'Bookmark';
             $objectId = md5(rand());
             $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
         } else if ($object['type'] == 'Note') {
-            $object['type'] = $nsFoaf . 'Document';
+            $object['type'] = $nsSioc . 'Post';
             $type = 'Note';
             $objectId = md5(rand());
             $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
         }
-        var_dump($object);
+
         $activity = array(
+            // activity resource
             $activityUri => array(
                 $nsRdf . 'type' => array(
                     array(
@@ -134,13 +136,14 @@ class Xodx_ActivityController extends Xodx_Controller
                         'value' => $objectUri
                     )
                 )
-            )
+            ),
         );
 
         if ($object['type'] != 'uri') {
             $actTypeUri = $object['type'];
             $actContent = $object['content'];
 
+            // general statements of resource
             $activity[$objectUri] = array(
                 $nsRdf . 'type' => array(
                     array(
@@ -162,14 +165,14 @@ class Xodx_ActivityController extends Xodx_Controller
                     )
                 )
             );
+            // Triples of Post resource
+            if ($type == 'Note') {
+                $activity[$objectUri][$nsSioc . 'content'][0]['type'] = 'literal';
+                $activity[$objectUri][$nsSioc . 'content'][0]['type'] = $actContent;
+            }
+
             // Triples of photo object
             if ($type == 'Photo') {
-                $activity[$objectUri][$nsFoaf . 'Image'] = array(
-                    array(
-                        'type' => 'literal',
-                        'value' => $object['fileName'],
-                    )
-                );
                 $activity[$objectUri][$nsOv . 'hasContentType'] = array(
                     array(
                         'type' => 'literal',
@@ -177,21 +180,34 @@ class Xodx_ActivityController extends Xodx_Controller
                     )
                 );
             }
-        // Triples of Bookmark object
+            // Triples of Bookmark object
             if ($type == 'Bookmark') {
                 $activity[$objectUri][$nsAair . 'targetURL'][0]['type'] = 'literal';
                 $activity[$objectUri][$nsAair . 'targetURL'][0]['value'] = $object['content'];
             }
-            // Adding user text about photo/bookmark
-            if (
-                ($type == 'Photo' || $type == 'Bookmark') &&
-                !empty($object['about'])
+            // create post resource about image/bookmark if comment exists
+            if ((($type == 'Bookmark') || ($type == 'Photo'))
+                && (!empty($object['about']))
             ) {
-                $activity[$objectUri][$nsFoaf . 'topic'][0]['type'] = 'literal';
-                $activity[$objectUri][$nsFoaf . 'topic'][0]['value'] = $object['about'];
-            } else {
-                $activity[$objectUri][$nsFoaf . 'topic'][0]['type'] = 'literal';
-                $activity[$objectUri][$nsFoaf . 'topic'][0]['value'] = $actContent;
+                $activity[$postUri][$nsRdf . 'type'][0]['type'] = 'uri';
+                $activity[$postUri][$nsRdf . 'type'][0]['value'] = $nsSioc . 'Post';
+
+                $activity[$postUri][$nsRdf . 'about'][0]['type'] = 'uri';
+                $activity[$postUri][$nsRdf . 'about'][0]['value'] = $objectUri;
+
+                $activity[$postUri][$nsSioc . 'has_creator'][0]['type'] = 'uri';
+                $activity[$postUri][$nsSioc . 'has_creator'][0]['value'] = $actorUri;
+
+                $activity[$postUri][$nsAair . 'created_at'][0]['type'] = 'literal';
+                $activity[$postUri][$nsAair . 'created_at'][0]['value'] = $now;
+                $activity[$postUri][$nsAair . 'created_at'][0]['datatype'] = $nsXsd . 'dateTime';
+
+                $activity[$postUri][$nsSioc . 'content'][0]['type'] = 'literal';
+                $activity[$postUri][$nsSioc . 'content'][0]['value'] = $object['about'];
+
+                // add post resource as second activity object of activity resource
+                $activity[$activityUri][$nsAair . 'activityObject'][1]['type'] = 'uri';
+                $activity[$activityUri][$nsAair . 'activityObject'][1]['value'] = $postUri;
             }
 
         $store->addMultipleStatements($graphUri, $activity);
