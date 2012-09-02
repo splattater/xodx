@@ -160,4 +160,25 @@ class Xodx_ResourceController extends Xodx_Controller
         //$template->addContent('templates/resourceshow.phtml');
         return $template;
     }
+
+    /**
+     *
+     * get the type of a ressource
+     * @param $resourceUri a URI of a ressource
+     */
+    public function getType ($resourceUri)
+    {
+        $bootstrap = $this->_app->getBootstrap();
+        $model = $bootstrap->getResource('model');
+
+        $query = '' .
+            'SELECT ?type ' .
+            'WHERE { ';
+            ' <' . $resourceUri . '> a  ?type  .} ';
+
+        $type = $model->sparqlQuery($query);
+        //TODO get linked data if resource is not in out namespace
+
+        return $type[0]['name'];
+    }
 }
