@@ -261,6 +261,10 @@ class Xodx_ActivityController extends Xodx_Controller
         $nsAairAtom = 'http://activitystrea.ms/schema/1.0/';
         $nsAair = 'http://xmlns.notu.be/aair#';
 
+        $nsSioc = 'http://rdfs.org/sioc/ns#';
+        $nsFoaf = 'http://xmlns.com/foaf/spec/#';
+        $nsOv = 'http://open.vocab.org/docs/';
+
         // Queries
 
         // Get all activities of a Person
@@ -291,18 +295,16 @@ class Xodx_ActivityController extends Xodx_Controller
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
             '             aair:activityObject ?object . ' .
-            'OPTIONAL { ' .
-            '   ?activity a                   aair:Activity . ' ;
-            '             aair:activityObject ?object . ' .
+/*            'OPTIONAL { ' .
+            '   ?activity a                   aair:Activity ; ' .
             '             aair:activityActor  ?person ; ' .
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
             '             aair:activityObject ?object . ' .
-            '    ?o       sioc:reply_of       <' . $resourceUri . '> . ' .
-            '} ' .
-            '} ' .
-            'ORDER BY DESC(?date)';
-            ' ' ;
+            '    ?object  sioc:reply_of       <' . $resourceUri . '> . ' .
+            '} ' .*/
+            '} '  ;
+            //'ORDER BY DESC(?date)';
 
         // Get given Activity and activities containing activityObjects replying
         // to activityOjects included in this Actitivity
@@ -321,15 +323,14 @@ class Xodx_ActivityController extends Xodx_Controller
             '    <' . $resourceUri . '>  a    aair:Activity ; ' .
             '             aair:activityObject ?o . ' .
             '    ?s       a aair:Activity . ' ;
-            '             aair:activityObject ?object . ' .
+            '             aair:activityObject ?object ; ' .
             '             aair:activityActor  ?person ; ' .
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
-            '    ?o       sioc:reply_of       ?o ; ' .
+            '    ?o       sioc:reply_of       ?o . ' .
             '} ' .
             '} ' .
             'ORDER BY DESC(?date)';
-            ' ' ;
 
         $model = $this->_app->getBootstrap()->getResource('model');
 
@@ -340,11 +341,13 @@ class Xodx_ActivityController extends Xodx_Controller
         // get Type of Ressource and go on
         $resourceController = $this->_app->getController('Xodx_ResourceController');
         $type = $resourceController->getType($resourceUri);
-        if ($type == 'Activity') {
+        if ($type == $nsAair . 'Activity') {
             $query = $activityQuery;
-        } elseif (($type == 'Post') || ($type == 'Document') || ($type == 'Image')) {
+        } elseif (($type == $nsSioc . 'Post') || ($type == $nsFoaf . 'Document') ||
+            ($type == $nsFoaf . 'Image'))
+        {
             $query = $objectQuery;
-        } elseif ($type == 'Person'){
+        } elseif ($type == $nsFoaf . 'Person'){
             $query = $personQuery;
         }
 
