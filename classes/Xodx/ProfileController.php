@@ -9,8 +9,8 @@ class Xodx_ProfileController extends Xodx_Controller
         $model = $this->_app->getBootstrap()->getResource('Model');
 
         $profiles = $model->sparqlQuery(
-            'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' . 
-            'SELECT DISTINCT ?person ' . 
+            'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' .
+            'SELECT DISTINCT ?person ' .
             'WHERE { ' .
             '   ?profile a foaf:PersonalProfileDocument . ' .
             '   ?profile foaf:primaryTopic ?person . ' .
@@ -48,8 +48,8 @@ class Xodx_ProfileController extends Xodx_Controller
 
         $nsFoaf = 'http://xmlns.com/foaf/0.1/';
 
-        $profileQuery = 'PREFIX foaf: <' . $nsFoaf . '> ' . 
-            'SELECT ?depiction ?name ?nick ' . 
+        $profileQuery = 'PREFIX foaf: <' . $nsFoaf . '> ' .
+            'SELECT ?depiction ?name ?nick ' .
             'WHERE { ' .
             '   <' . $personUri . '> a foaf:Person . ' .
             '   OPTIONAL {<' . $personUri . '> foaf:depiction ?depiction .} ' .
@@ -58,8 +58,8 @@ class Xodx_ProfileController extends Xodx_Controller
             '}';
 
         // TODO deal with language tags
-        $contactsQuery = 'PREFIX foaf: <' . $nsFoaf . '> ' . 
-            'SELECT ?contactUri ?name ' . 
+        $contactsQuery = 'PREFIX foaf: <' . $nsFoaf . '> ' .
+            'SELECT ?contactUri ?name ' .
             'WHERE { ' .
             '   <' . $personUri . '> foaf:knows ?contactUri . ' .
             '   OPTIONAL {?contactUri foaf:name ?name .} ' .
