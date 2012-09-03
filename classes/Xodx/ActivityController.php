@@ -83,7 +83,7 @@ class Xodx_ActivityController extends Xodx_Controller
         $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
         $now = date('c');
         $postId = md5(rand());
-        $postUri = $nsXodx . '?c=resource&id=' . $postId;
+        $postUri = $this->_app->getBaseUri() . '?c=resource&id=' . $postId;
         // Take photo's filename as objectname
         if ($object['type'] == 'Photo') {
             $object['type'] = $nsFoaf . 'Image';
@@ -255,30 +255,99 @@ class Xodx_ActivityController extends Xodx_Controller
      * TODO return an array of Xodx_Activity objects
      * TODO getActivity by objectURI
      */
-    public function getActivities ($personUri)
+    public function getActivities ($resourceUri)
     {
         // There are two namespaces, one is used in atom files the other one for RDF
         $nsAairAtom = 'http://activitystrea.ms/schema/1.0/';
         $nsAair = 'http://xmlns.notu.be/aair#';
 
-        $model = $this->_app->getBootstrap()->getResource('model');
+        // Queries
 
-        if ($personUri === null) {
-            return null;
-        }
-
-        $query = '' .
+        // Get all activities of a Person
+        $personQuery = '' .
             'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
             'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
             'SELECT ?activity ?date ?verb ?object ' .
             'WHERE { ' .
             '   ?activity a                   aair:Activity ; ' .
-            '             aair:activityActor  <' . $personUri . '> ; ' .
+            '             aair:activityActor  <' . $resourceUri . '> ; ' .
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
             '             aair:activityObject ?object . ' .
             '} ' .
             'ORDER BY DESC(?date)';
+
+        // Get activity of an ActivityObject and all activities
+        // containing objects replying to this ActivityObject
+        $objectQuery = '' .
+            'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
+            'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
+            'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
+            'SELECT ?activity ?date ?verb ?object ' .
+            'WHERE { ' .
+            '   ?activity a                   aair:Activity ; ' .
+            '             aair:activityObject <' . $resourceUri . '> ; ' .
+            '             aair:activityActor  ?person ; ' .
+            '             atom:published      ?date ; ' .
+            '             aair:activityVerb   ?verb ; ' .
+            '             aair:activityObject ?object . ' .
+            'OPTIONAL { ' .
+            '   ?activity a                   aair:Activity . ' ;
+            '             aair:activityObject ?object . ' .
+            '             aair:activityActor  ?person ; ' .
+            '             atom:published      ?date ; ' .
+            '             aair:activityVerb   ?verb ; ' .
+            '             aair:activityObject ?object . ' .
+            '    ?o       sioc:reply_of       <' . $resourceUri . '> . ' .
+            '} ' .
+            '} ' .
+            'ORDER BY DESC(?date)';
+            ' ' ;
+
+        // Get given Activity and activities containing activityObjects replying
+        // to activityOjects included in this Actitivity
+        $activityQuery = '' .
+            'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
+            'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
+            'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
+            'SELECT ?activity ?date ?verb ?object ' .
+            'WHERE { ' .
+            '    <' . $resourceUri . '>       a aair:Activity ; ' .
+            '             aair:activityActor  ?person ; ' .
+            '             atom:published      ?date ; ' .
+            '             aair:activityVerb   ?verb ; ' .
+            '             aair:activityObject ?object . ' .
+            'OPTIONAL { ' .
+            '    <' . $resourceUri . '>  a    aair:Activity ; ' .
+            '             aair:activityObject ?o . ' .
+            '    ?s       a aair:Activity . ' ;
+            '             aair:activityObject ?object . ' .
+            '             aair:activityActor  ?person ; ' .
+            '             atom:published      ?date ; ' .
+            '             aair:activityVerb   ?verb ; ' .
+            '    ?o       sioc:reply_of       ?o ; ' .
+            '} ' .
+            '} ' .
+            'ORDER BY DESC(?date)';
+            ' ' ;
+
+        $model = $this->_app->getBootstrap()->getResource('model');
+
+        if ($resourceUri === null) {
+            return null;
+        }
+
+        // get Type of Ressource and go on
+        $resourceController = $this->_app->getController('Xodx_ResourceController');
+        $type = $resourceController->getType($resourceUri);
+        if ($type == 'Activity') {
+            $query = $activityQuery;
+        } elseif (($type == 'Post') || ($type == 'Document') || ($type == 'Image')) {
+            $query = $objectQuery;
+        } elseif ($type == 'Person'){
+            $query = $personQuery;
+        }
+
         $activitiesResult = $model->sparqlQuery($query);
 
         $activities = array();
@@ -306,25 +375,29 @@ class Xodx_ActivityController extends Xodx_Controller
                     'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
                     'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
                     'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
+                    'PREFIX foaf: <http://xmlns.com/foaf/spec/#> ' .
                     'SELECT ?type ?content ?date ' .
                     'WHERE { ' .
                     '   <' . $objectUri . '> a ?type ; ' .
-                    '        sioc:created_at ?date ; ' .
-                    '        aair:content ?content . ' .
+                    '        sioc:created_at ?date . ' .
+                    '   OPTIONAL {<' . $objectUri . '> sioc:content ?content .} ' .
                     '} '
                     );
 
                 if (count($objectResult) > 0) {
                     $activity['objectType'] = $objectResult[0]['type'];
                     $activity['objectPubDate'] = self::_issueE24fix($objectResult[0]['date']);
-                    $activity['objectContent'] = $objectResult[0]['content'];
+                    $activity['objectFeed'] = htmlentities($this->_app->getBaseUri() . '
+                    	?c=feed&a=getFeed&uri=') . urlencode($objectUri);
+                    if (!empty($objectResult[0]['content'])) {
+                        $activity['objectContent'] = $objectResult[0]['content'];
+                    }
                 }
             } else {
             }
 
             $activities[] = $activity;
         }
-        var_dump($activities);
         return $activities;
     }
 }
