@@ -37,23 +37,25 @@ if ($contact['name'] != null) {
       <p>
         <a href="<?= $activity['uri'] ?>"><strong><?= $activity['title'] ?></strong></a><br />
         <em><?= $activity['pubDate'] ?></em>
+        <em><a href="?c=feed&amp;a=getFeed&amp;uri=<?= urlencode($activity['uri']) ?>">
+            Show Activity Feed
+        </a></em>
       </p>
       <p>
         <a href="<?= htmlentities($activity['authorUri']) ?>">
             <?= htmlentities($activity['authorUri']) ?>
         </a>
         did <a href="<?= htmlentities($activity['verb']) ?>"><?= htmlentities($activity['verb']) ?></a>
-        <?php if (isset($activity['objectType'])) : ?>
 
-        a <a href="?c=resource&id=<?= htmlentities($activity['object']) ?>">
+        <?php if (isset($activity['objectType'])) : ?>
+        a <a href="<?= htmlentities($activity['object']) ?>">
             <?= htmlentities($activity['object']) ?>
         </a>
         <?php endif; ?>
         : <a href="<?= htmlentities($activity['object']) ?>"><?= htmlentities($activity['object']) ?></a>
-        <?php if (isset($activity['objectContent'])) : ?>
-
-        <?= $activity['objectContent'] ?>
-        <?php endif; ?>
+        <em><a href="?c=feed&amp;a=getFeed&amp;uri=<?= urlencode($activity['object']) ?>">
+            Show Activity Feed of Object
+        </a></em>
     </div>
     <?php endforeach; ?>
     <?php else: ?>
