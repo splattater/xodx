@@ -16,7 +16,7 @@ class Xodx_FeedController extends Xodx_Controller
         $format = $request->getValue('format');
 
         if ($uri !== null) {
-
+            //TODO change to ActivityController, get activities of things != person
             $personController = $this->_app->getController('Xodx_PersonController');
             $activities = $personController->getActivities($uri);
 
