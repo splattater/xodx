@@ -62,8 +62,12 @@ class Xodx_ResourceController extends Xodx_Controller
             '} ';
         $properties = $model->sparqlQuery($query);
 
+        $activityController = $this->_app->getController('Xodx_ActivityController');
+        $activities = $activityController->getActivities($objectUri);
+
         $template->addContent('templates/resourceshow.phtml');
         $template->properties = $properties;
+        $template->activities = $activities;
         // TODO getActivity with objectURI from Xodx_ActivityController
         /**$personController = new Xodx_PersonController($this->_app);
         $activities = $personController->getActivities($personUri);
@@ -146,7 +150,7 @@ class Xodx_ResourceController extends Xodx_Controller
             'SELECT ?mime ' .
             'WHERE { ' .
             '   <' . $objectUri . '> a foaf:Image ; ' .
-            '		ov:hasContentType ?mime . ' .
+            '   ov:hasContentType    ?mime . ' .
             '} ';
         $properties = $model->sparqlQuery($query);
         $mediaController = $this->_app->getController('Xodx_MediaController');
@@ -173,12 +177,12 @@ class Xodx_ResourceController extends Xodx_Controller
 
         $query = '' .
             'SELECT ?type ' .
-            'WHERE { ';
+            'WHERE { ' .
             ' <' . $resourceUri . '> a  ?type  .} ';
 
         $type = $model->sparqlQuery($query);
         //TODO get linked data if resource is not in out namespace
 
-        return $type[0]['name'];
+        return $type[0]['type'];
     }
 }
