@@ -168,7 +168,7 @@ class Xodx_ActivityController extends Xodx_Controller
             // Triples of Post resource
             if ($type == 'Note') {
                 $activity[$objectUri][$nsSioc . 'content'][0]['type'] = 'literal';
-                $activity[$objectUri][$nsSioc . 'content'][0]['type'] = $actContent;
+                $activity[$objectUri][$nsSioc . 'content'][0]['value'] = $actContent;
             }
 
             // Triples of photo object
@@ -278,8 +278,8 @@ class Xodx_ActivityController extends Xodx_Controller
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
             '             aair:activityObject ?object . ' .
-            '} ' .
-            'ORDER BY DESC(?date)';
+            '} ' ;
+            //'ORDER BY DESC(?date)';
 
         // Get activity of an ActivityObject and all activities
         // containing objects replying to this ActivityObject
@@ -295,7 +295,7 @@ class Xodx_ActivityController extends Xodx_Controller
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
             '             aair:activityObject ?object . ' .
-/*            'OPTIONAL { ' .
+            /*'OPTIONAL { ' .
             '   ?activity a                   aair:Activity ; ' .
             '             aair:activityActor  ?person ; ' .
             '             atom:published      ?date ; ' .
@@ -319,7 +319,7 @@ class Xodx_ActivityController extends Xodx_Controller
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
             '             aair:activityObject ?object . ' .
-            'OPTIONAL { ' .
+            /*'OPTIONAL { ' .
             '    <' . $resourceUri . '>  a    aair:Activity ; ' .
             '             aair:activityObject ?o . ' .
             '    ?s       a aair:Activity . ' ;
@@ -328,7 +328,7 @@ class Xodx_ActivityController extends Xodx_Controller
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
             '    ?o       sioc:reply_of       ?o . ' .
-            '} ' .
+            '} ' .*/
             '} ' .
             'ORDER BY DESC(?date)';
 
