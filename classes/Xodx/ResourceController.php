@@ -145,7 +145,7 @@ class Xodx_ResourceController extends Xodx_Controller
         $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
 
         $query = '' .
-            'PREFIX foaf: <http://xmlns.com/foaf/spec/#> ' .
+            'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' .
             'PREFIX ov: <http://open.vocab.org/docs/> ' .
             'SELECT ?mime ' .
             'WHERE { ' .
