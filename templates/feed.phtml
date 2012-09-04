@@ -20,7 +20,7 @@
       </author>
       <activity:verb><?= $activity['verb'] ?></activity:verb>
       <activity:object>
-        <id><?= $activity['object'] ?></id>
+        <id><?= htmlentities($activity['object']) ?></id>
         <?php if (isset($activity['objectContent'])) : ?>
 
         <content><?= $activity['objectContent'] ?></content>
