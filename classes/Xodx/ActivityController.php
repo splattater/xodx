@@ -71,13 +71,13 @@ class Xodx_ActivityController extends Xodx_Controller
         $model = $bootstrap->getResource('model');
         $config = $bootstrap->getResource('config');
         $graphUri = $model->getModelIri();
-        $nsXsd = 'http://www.w3.org/2001/XMLSchema#';'PREFIX foaf <http://xmlns.com/foaf/spec/#> ' .
+        $nsXsd = 'http://www.w3.org/2001/XMLSchema#';
         $nsRdf = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
         $nsSioc = 'http://rdfs.org/sioc/ns#';
         $nsAtom = 'http://www.w3.org/2005/Atom/';
         $nsAair = 'http://xmlns.notu.be/aair#';
         $nsXodx = 'http://xodx.org/ns#';
-        $nsFoaf = 'http://xmlns.com/foaf/spec/#';
+        $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsOv = 'http://open.vocab.org/docs/';
 
         $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
@@ -262,7 +262,7 @@ class Xodx_ActivityController extends Xodx_Controller
         $nsAair = 'http://xmlns.notu.be/aair#';
 
         $nsSioc = 'http://rdfs.org/sioc/ns#';
-        $nsFoaf = 'http://xmlns.com/foaf/spec/#';
+        $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsOv = 'http://open.vocab.org/docs/';
 
         // Queries
@@ -341,6 +341,7 @@ class Xodx_ActivityController extends Xodx_Controller
         // get Type of Ressource and go on
         $resourceController = $this->_app->getController('Xodx_ResourceController');
         $type = $resourceController->getType($resourceUri);
+
         $isPerson = false;
         if ($type == $nsAair . 'Activity') {
             $query = $activityQuery;
@@ -348,7 +349,7 @@ class Xodx_ActivityController extends Xodx_Controller
             ($type == $nsFoaf . 'Image'))
         {
             $query = $objectQuery;
-        } elseif ($type == $nsFoaf . 'Person'){
+        } elseif ($type == $nsFoaf . 'PersonalProfileDocument'){
             $query = $personQuery;
             $isPerson = true;
         }
@@ -365,7 +366,7 @@ class Xodx_ActivityController extends Xodx_Controller
             $activity['date'] = self::_issueE24fix($activity['date']);
             if ($isPerson) {
                 $activity['person'] = $resourceUri;
-                $title = '"' . $personUri . '" did "' . $activity['verb'] . '".';
+                $title = '"' . $resourceUri . '" did "' . $activity['verb'] . '".';
             } else {
                 //$title = '"Activity Feed of:."';
                 $title = '"Activity Feed of: ' . $resourceUri . '".';
@@ -386,7 +387,7 @@ class Xodx_ActivityController extends Xodx_Controller
                     'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
                     'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
                     'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
-                    'PREFIX foaf: <http://xmlns.com/foaf/spec/#> ' .
+                    'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' .
                     'SELECT ?type ?content ?date ' .
                     'WHERE { ' .
                     '   <' . $objectUri . '> a ?type ; ' .
