@@ -287,7 +287,7 @@ class Xodx_ActivityController extends Xodx_Controller
             'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
             'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
             'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
-            'SELECT ?activity ?date ?verb ?object ' .
+            'SELECT ?activity ?date ?verb ?object ?person ' .
             'WHERE { ' .
             '   ?activity a                   aair:Activity ; ' .
             '             aair:activityObject <' . $resourceUri . '> ; ' .
@@ -312,7 +312,7 @@ class Xodx_ActivityController extends Xodx_Controller
             'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
             'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
             'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
-            'SELECT ?activity ?date ?verb ?object ' .
+            'SELECT ?activity ?date ?verb ?object ?person ' .
             'WHERE { ' .
             '    <' . $resourceUri . '>       a aair:Activity ; ' .
             '             aair:activityActor  ?person ; ' .
@@ -341,6 +341,7 @@ class Xodx_ActivityController extends Xodx_Controller
         // get Type of Ressource and go on
         $resourceController = $this->_app->getController('Xodx_ResourceController');
         $type = $resourceController->getType($resourceUri);
+        $isPerson = false;
         if ($type == $nsAair . 'Activity') {
             $query = $activityQuery;
         } elseif (($type == $nsSioc . 'Post') || ($type == $nsFoaf . 'Document') ||
@@ -349,6 +350,7 @@ class Xodx_ActivityController extends Xodx_Controller
             $query = $objectQuery;
         } elseif ($type == $nsFoaf . 'Person'){
             $query = $personQuery;
+            $isPerson = true;
         }
 
         $activitiesResult = $model->sparqlQuery($query);
@@ -361,19 +363,25 @@ class Xodx_ActivityController extends Xodx_Controller
             $objectUri = $activity['object'];
 
             $activity['date'] = self::_issueE24fix($activity['date']);
-
+            if ($isPerson) {
+                $activity['person'] = $resourceUri;
+                $title = '"' . $personUri . '" did "' . $activity['verb'] . '".';
+            } else {
+                //$title = '"Activity Feed of:."';
+                $title = '"Activity Feed of: ' . $resourceUri . '".';
+            }
             $activity = array(
-                'title' => '"' . $personUri . '" did "' . $activity['verb'] . '".',
+                'title' => $title,
                 'uri' => $activityUri,
                 'author' => 'Natanael',
-                'authorUri' => $personUri,
+                'authorUri' => $activity['person'],
                 'pubDate' => $activity['date'],
                 'verb' => $activity['verb'],
                 'object' => $activity['object'],
             );
 
 
-            if ($verbUri == $nsAair . 'Post' || $verbUri == $nsAair . 'Share') {
+            //if ($verbUri == $nsAair . 'Post' || $verbUri == $nsAair . 'Share') {
                 $objectResult = $model->sparqlQuery(
                     'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
                     'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
@@ -396,11 +404,24 @@ class Xodx_ActivityController extends Xodx_Controller
                         $activity['objectContent'] = $objectResult[0]['content'];
                     }
                 }
-            } else {
-            }
+            //} else {
+            //}
 
             $activities[] = $activity;
         }
         return $activities;
+    }
+
+    /**
+     * Quick fix for Erfurt issue #24 (https://github.com/AKSW/Erfurt/issues/24)
+     */
+    private static function _issueE24fix ($date)
+    {
+        if (substr($date, 11, 1) != 'T') {
+            $dateObj = date_create($date);
+            return date_format($dateObj, 'c');
+        } else {
+            return $date;
+        }
     }
 }
