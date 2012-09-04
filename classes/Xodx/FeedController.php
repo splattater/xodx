@@ -12,12 +12,16 @@ class Xodx_FeedController extends Xodx_Controller
         $model = $bootstrap->getResource('model');
         $request = $bootstrap->getResource('request');
 
+        $nsSioc = 'http://rdfs.org/sioc/ns#';
+        $nsFoaf = 'http://xmlns.com/foaf/spec/#';
+        $nsAair = 'http://xmlns.notu.be/aair#';
+
         $uri = $request->getValue('uri');
         $format = $request->getValue('format');
 
         if ($uri !== null) {
             //TODO change to ActivityController, get activities of things != person
-            $personController = $this->_app->getController('Xodx_PersonController');
+            $personController = $this->_app->getController('Xodx_ActivityController');
             $activities = $personController->getActivities($uri);
 
             $pushController = $this->_app->getController('Xodx_PushController');
@@ -32,6 +36,9 @@ class Xodx_FeedController extends Xodx_Controller
                 }
             }
 
+            $resourceController = $this->_app->getController('Xodx_ResourceController');
+            $type = $resourceController->getType($uri);
+
             $nameHelper = new Xodx_NameHelper($this->_app);
 
             $template->setLayout('templates/feed.phtml');
@@ -39,7 +46,15 @@ class Xodx_FeedController extends Xodx_Controller
             $template->uri = $uri;
             $template->feedUri = $feedUri;
             $template->hub = $pushController->getDefaultHubUrl();
-            $template->name = $nameHelper->getName($uri);
+            $isPerson = false;
+            if (($type == $nsSioc . 'Post') || ($type == $nsFoaf . 'Document') ||
+                ($type == $nsFoaf . 'Image') || ($type == $nsAair . 'Activity'))
+            {
+                $name = 'Test';
+            } else {
+                $name = $nameHelper->getName($uri);
+            }
+            $template->name = $name;
             $template->activities = $activities;
         } else {
             // No URI given
