@@ -9,7 +9,7 @@
     <?php foreach ($this->activities as $activity) : ?>
 
     <entry>
-      <title><?= $activity['title'] ?></title>
+      <title><?= htmlentities($activity['title']) ?></title>
       <id><?= htmlentities($activity['uri']) ?></id>
       <link href="<?= htmlentities($activity['uri']) ?>" />
       <published><?= $activity['pubDate'] ?></published>
