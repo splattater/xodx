@@ -13,7 +13,7 @@ class Xodx_FeedController extends Xodx_Controller
         $request = $bootstrap->getResource('request');
 
         $nsSioc = 'http://rdfs.org/sioc/ns#';
-        $nsFoaf = 'http://xmlns.com/foaf/spec/#';
+        $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsAair = 'http://xmlns.notu.be/aair#';
 
         $uri = $request->getValue('uri');
