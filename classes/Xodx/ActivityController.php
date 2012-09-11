@@ -11,6 +11,11 @@ class Xodx_ActivityController extends Xodx_Controller
         $verb = $request->getValue('verb', 'post');
         $actType = $request->getValue('type', 'post');
         $actContent = $request->getValue('content', 'post');
+        if ($request->getValue('reply', 'post') !== null) {
+            $replyObject = $request->getValue('reply', 'post');
+        } else {
+            $replyObject = null;
+        }
 
                 $nsAair = 'http://xmlns.notu.be/aair#';
 
@@ -29,7 +34,7 @@ class Xodx_ActivityController extends Xodx_Controller
                     'type' => $actType,
                     'content' => $actContent,
                 );
-                $debugStr = $this->addActivity($actorUri, $verbUri, $object);
+                $debugStr = $this->addActivity($actorUri, $verbUri, $object, $replyObject);
             break;
             case 'Bookmark';
                 $object = array(
@@ -50,7 +55,7 @@ class Xodx_ActivityController extends Xodx_Controller
                     'fileName' => $fileInfo['fileId'],
                     'mimeType' => $fileInfo['mimeType'],
                 );
-                $debugStr = $this->addActivity($actorUri, $verbUri, $object);
+                $debugStr = $this->addActivity($actorUri, $verbUri, $object, $isReply);
             break;
         }
         $template->addDebug($debugStr);
@@ -62,7 +67,7 @@ class Xodx_ActivityController extends Xodx_Controller
      * This method adds a new activity to the store
      * TODO should be replaced by a method with takes a Xodx_Activity object
      */
-    public function addActivity ($actorUri, $verbUri, $object)
+    public function addActivity ($actorUri, $verbUri, $object, $replyObject)
     {
 
         $bootstrap = $this->_app->getBootstrap();
@@ -138,6 +143,11 @@ class Xodx_ActivityController extends Xodx_Controller
                 )
             ),
         );
+        //If this activity contains a reply, add this statement, too
+        if ($replyObject !== null) {
+            $activity[$activityUri][$nsAair . 'Replies'][0]['type'] = 'uri';
+            $activity[$activityUri][$nsAair . 'Replies'][0]['value'] = $replyObject;
+        }
 
         if ($object['type'] != 'uri') {
             $actTypeUri = $object['type'];
@@ -165,6 +175,11 @@ class Xodx_ActivityController extends Xodx_Controller
                     )
                 )
             );
+            //If this activity contains a reply, add this statement, too
+            if ($replyObject !== null) {
+                $activity[$objectUri][$nsSioc . 'reply_of'][0]['type'] = 'uri';
+                $activity[$objectUri][$nsSioc . 'reply_of'][0]['value'] = $replyObject;
+            }
             // Triples of Post resource
             if ($type == 'Note') {
                 $activity[$objectUri][$nsSioc . 'content'][0]['type'] = 'literal';
@@ -185,31 +200,9 @@ class Xodx_ActivityController extends Xodx_Controller
                 $activity[$objectUri][$nsAair . 'targetURL'][0]['type'] = 'literal';
                 $activity[$objectUri][$nsAair . 'targetURL'][0]['value'] = $object['content'];
             }
-            // create post resource about image/bookmark if comment exists
-            if ((($type == 'Bookmark') || ($type == 'Photo'))
-                && (!empty($object['about']))
-            ) {
-                $activity[$postUri][$nsRdf . 'type'][0]['type'] = 'uri';
-                $activity[$postUri][$nsRdf . 'type'][0]['value'] = $nsSioc . 'Post';
+        }
 
-                $activity[$postUri][$nsRdf . 'about'][0]['type'] = 'uri';
-                $activity[$postUri][$nsRdf . 'about'][0]['value'] = $objectUri;
-
-                $activity[$postUri][$nsSioc . 'has_creator'][0]['type'] = 'uri';
-                $activity[$postUri][$nsSioc . 'has_creator'][0]['value'] = $actorUri;
-
-                $activity[$postUri][$nsAair . 'created_at'][0]['type'] = 'literal';
-                $activity[$postUri][$nsAair . 'created_at'][0]['value'] = $now;
-                $activity[$postUri][$nsAair . 'created_at'][0]['datatype'] = $nsXsd . 'dateTime';
-
-                $activity[$postUri][$nsSioc . 'content'][0]['type'] = 'literal';
-                $activity[$postUri][$nsSioc . 'content'][0]['value'] = $object['about'];
-
-                // add post resource as second activity object of activity resource
-                $activity[$activityUri][$nsAair . 'activityObject'][1]['type'] = 'uri';
-                $activity[$activityUri][$nsAair . 'activityObject'][1]['value'] = $postUri;
-            }
-
+        //proceed and subsribe to feed
         $store->addMultipleStatements($graphUri, $activity);
 
         $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
@@ -218,18 +211,130 @@ class Xodx_ActivityController extends Xodx_Controller
             $pushController = $this->_app->getController('Xodx_PushController');
             $pushController->publish($feedUri);
         }
-
         // Subscribe user to feed of activityObject (photo, post, note)
         $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
-        echo '$feedUri: ' . $feedUri;
-        echo '$actorUri: ' . $actorUri;
         $userController = $this->_app->getController('Xodx_UserController');
         $actorUri = urldecode($actorUri);
 
         $userController->subscribeToFeed($actorUri, $feedUri);
 
-        return $feedUri . "\n" . var_export($activity, true);
+        // create a second activity if post resource about image/bookmark exists
+        // an activity contains only one activityObject, so posting/sharing a(n) image/link
+        // while also giving a comment/description about it, leads to a 2nd activity
+        if ((($type == 'Bookmark') || ($type == 'Photo'))
+            && (!empty($object['about']))
+        ) {
+            $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
+            $now = date('c');
+            $activity = array(
+                // The 2nd activity resource
+                $activityUri => array(
+                    $nsRdf . 'type' => array(
+                        array(
+                            'type' => 'uri',
+                            'value' => $nsAair . 'Activity'
+                        )
+                    ),
+                    $nsAtom . 'published' => array(
+                        array(
+                            'type' => 'literal',
+                            'value' => $now,
+                            'datatype' => $nsXsd . 'dateTime'
+                        )
+                    ),
+                    $nsAair . 'activityActor' => array(
+                        array(
+                            'type' => 'uri',
+                            'value' => $actorUri
+                        )
+                    ),
+                    $nsAair . 'activityVerb' => array(
+                        array(
+                            'type' => 'uri',
+                            'value' => $nsAair . 'Post'
+                        )
+                    ),
+                    $nsAair . 'activityObject' => array(
+                        array(
+                            'type' => 'uri',
+                            'value' => $postUri
+                        )
+                    ),
+                    $nsAair . 'Replies' => array(
+                        array(
+                            'type' => 'uri',
+                            'value' => $objectUri
+                        )
+                    )
+                )
+            );
+
+            // general statements of 2nd resource
+            $activity[$postUri] = array(
+                $nsRdf . 'type' => array(
+                    array(
+                        'type' => 'uri',
+                        'value' => $nsSioc . 'Comment'
+                    )
+                ),
+                $nsSioc . 'created_at' => array(
+                    array(
+                        'type' => 'literal',
+                        'value' => $now,
+                        'datatype' => $nsXsd . 'dateTime'
+                    )
+                ),
+                $nsSioc . 'has_creator' => array(
+                    array(
+                        'type' => 'uri',
+                        'value' => $actorUri
+                    )
+                ),
+                $nsSioc . 'about' => array(
+                    array(
+                        'type' => 'uri',
+                        'value' => $objectUri
+                    )
+                ),
+                $nsSioc . 'content' => array(
+                    array(
+                        'type' => 'literal',
+                        'value' => $object['about']
+                    )
+                ),
+            );
+
+            //proceed and subsribe to feed
+            $store->addMultipleStatements($graphUri, $activity);
+
+            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
+
+            if ($config['push.enable'] == true) {
+                $pushController = $this->_app->getController('Xodx_PushController');
+                $pushController->publish($feedUri);
+            }
+
+            // Subscribe user to feed of activityObject (photo, post, note)
+            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
+            $userController = $this->_app->getController('Xodx_UserController');
+            $actorUri = urldecode($actorUri);
+
+            // ping the ressource we replied to
+            // not neccassery
+            $pingbackController = $this->_app->getController('Xodx_PingbackController');
+            $pingbackController->sendPing($objectUri, $postUri);
+
+            // add activity to activity feed of the ressource we replied to
+            $object = array(
+                'type' => 'uri',
+                'value' => $contactUri
+            );
+            $this->addActivity($actorUri, $nsAair . 'Post', $object);
         }
+
+        $userController->subscribeToFeed($actorUri, $feedUri);
+
+        return $feedUri . "\n" . var_export($activity, true);
     }
 
     /**
@@ -247,6 +352,31 @@ class Xodx_ActivityController extends Xodx_Controller
         foreach ($activities as $activity) {
             $store->addMultipleStatements($graphUri, $activity->toGraphArray());
         }
+    }
+
+    /**
+     *
+     */
+    public function replyFormAction ($template)
+    {
+        $bootstrap = $this->_app->getBootstrap();
+        $request = $bootstrap->getResource('request');
+        $objectUri = $request->getValue('object', 'post');
+        $actorUri = $request->getValue('actor', 'post');
+        $template->replyObject = $objectUri;
+        $template->replyActor = $actorUri;
+        $template->addContent('templates/reply.phtml');
+        return $template;
+
+    }
+
+    /**
+     *
+     * Enter description here ...
+     */
+    public function replyAction ($template)
+    {
+
     }
 
 	/**
@@ -303,8 +433,8 @@ class Xodx_ActivityController extends Xodx_Controller
             '             aair:activityObject ?object . ' .
             '    ?object  sioc:reply_of       <' . $resourceUri . '> . ' .
             '} ' .*/
-            '} '  ;
-            //'ORDER BY DESC(?date)';
+            '} ' .
+            'ORDER BY DESC(?date)';
 
         // Get given Activity and activities containing activityObjects replying
         // to activityOjects included in this Actitivity
