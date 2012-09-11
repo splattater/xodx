@@ -37,9 +37,6 @@ if ($contact['name'] != null) {
       <p>
         <a href="<?= $activity['uri'] ?>"><strong><?= $activity['title'] ?></strong></a><br />
         <em><?= $activity['pubDate'] ?></em>
-        <em><a href="?c=feed&amp;a=getFeed&amp;uri=<?= urlencode($activity['uri']) ?>">
-            Show Activity Feed
-        </a></em>
       </p>
       <p>
         <a href="<?= htmlentities($activity['authorUri']) ?>">
@@ -53,9 +50,11 @@ if ($contact['name'] != null) {
         </a>
         <?php endif; ?>
         : <a href="<?= htmlentities($activity['object']) ?>"><?= htmlentities($activity['object']) ?></a>
-        <em><a href="?c=feed&amp;a=getFeed&amp;uri=<?= urlencode($activity['object']) ?>">
-            Show Activity Feed of Object
-        </a></em>
+            <form method="post" action="?c=activity&a=replyForm">
+                <input type="hidden" name="object" value="<?= $activity['object']?>" />
+                <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
+                <button class="btn btn-mini" type="submit">Reply</button>
+            </form>
     </div>
     <?php endforeach; ?>
     <?php else: ?>
