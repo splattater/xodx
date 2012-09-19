@@ -11,13 +11,9 @@ class Xodx_ActivityController extends Xodx_Controller
         $verb = $request->getValue('verb', 'post');
         $actType = $request->getValue('type', 'post');
         $actContent = $request->getValue('content', 'post');
-        if ($request->getValue('reply', 'post') !== null) {
-            $replyObject = $request->getValue('reply', 'post');
-        } else {
-            $replyObject = null;
-        }
+        $replyObject = $request->getValue('reply', 'post');
 
-                $nsAair = 'http://xmlns.notu.be/aair#';
+        $nsAair = 'http://xmlns.notu.be/aair#';
 
         switch (strtolower($verb)) {
             case 'post':
@@ -33,14 +29,16 @@ class Xodx_ActivityController extends Xodx_Controller
                 $object = array(
                     'type' => $actType,
                     'content' => $actContent,
+                    'replyObject' => $replyObject,
                 );
-                $debugStr = $this->addActivity($actorUri, $verbUri, $object, $replyObject);
+                $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
             case 'Bookmark';
                 $object = array(
                     'type' => $actType,
                     'about' => $request->getValue('about', 'post'),
                     'content' => $actContent,
+                    'replyObject' => $replyObject,
                 );
                 $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
@@ -54,8 +52,9 @@ class Xodx_ActivityController extends Xodx_Controller
                     'content' => $actContent,
                     'fileName' => $fileInfo['fileId'],
                     'mimeType' => $fileInfo['mimeType'],
+                    'replyObject' => $replyObject,
                 );
-                $debugStr = $this->addActivity($actorUri, $verbUri, $object, $isReply);
+                $debugStr = $this->addActivity($actorUri, $verbUri, $object);
             break;
         }
         $template->addDebug($debugStr);
@@ -67,7 +66,7 @@ class Xodx_ActivityController extends Xodx_Controller
      * This method adds a new activity to the store
      * TODO should be replaced by a method with takes a Xodx_Activity object
      */
-    public function addActivity ($actorUri, $verbUri, $object, $replyObject)
+    public function addActivity ($actorUri, $verbUri, $object)
     {
 
         $bootstrap = $this->_app->getBootstrap();
@@ -84,7 +83,7 @@ class Xodx_ActivityController extends Xodx_Controller
         $nsXodx = 'http://xodx.org/ns#';
         $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsOv = 'http://open.vocab.org/docs/';
-
+var_dump($object);
         $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
         $now = date('c');
         $postId = md5(rand());
@@ -98,8 +97,9 @@ class Xodx_ActivityController extends Xodx_Controller
         } else if ($object['type'] == 'Bookmark') {
             $object['type'] = $nsFoaf . 'Document';
             $type = 'Bookmark';
-            $objectId = md5(rand());
-            $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+            //$objectId = md5(rand());
+            //$objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+            $objectUri = $object['content'];
         } else if ($object['type'] == 'Note') {
             $object['type'] = $nsSioc . 'Post';
             $type = 'Note';
@@ -143,17 +143,18 @@ class Xodx_ActivityController extends Xodx_Controller
                 )
             ),
         );
+        echo '$objectUri: ' . $objectUri;
         //If this activity contains a reply, add this statement, too
-        if ($replyObject !== null) {
-            $activity[$activityUri][$nsAair . 'Replies'][0]['type'] = 'uri';
-            $activity[$activityUri][$nsAair . 'Replies'][0]['value'] = $replyObject;
+        if ($object['replyObject'] !== 'false') {
+            echo 'alles gut';
+            $activity[$activityUri][$nsAair . 'activityContext'][0]['type'] = 'uri';
+            $activity[$activityUri][$nsAair . 'activityContext'][0]['value'] = $object['replyObject'];
         }
-
-        if ($object['type'] != 'uri') {
+        if ($object['type'] != 'Bookmark') {
             $actTypeUri = $object['type'];
             $actContent = $object['content'];
 
-            // general statements of resource
+            // general statements of object resource
             $activity[$objectUri] = array(
                 $nsRdf . 'type' => array(
                     array(
@@ -176,9 +177,9 @@ class Xodx_ActivityController extends Xodx_Controller
                 )
             );
             //If this activity contains a reply, add this statement, too
-            if ($replyObject !== null) {
+            if ($object['replyObject'] !== 'false') {
                 $activity[$objectUri][$nsSioc . 'reply_of'][0]['type'] = 'uri';
-                $activity[$objectUri][$nsSioc . 'reply_of'][0]['value'] = $replyObject;
+                $activity[$objectUri][$nsSioc . 'reply_of'][0]['value'] = $object['replyObject'];
             }
             // Triples of Post resource
             if ($type == 'Note') {
@@ -260,7 +261,7 @@ class Xodx_ActivityController extends Xodx_Controller
                             'value' => $postUri
                         )
                     ),
-                    $nsAair . 'Replies' => array(
+                    $nsAair . 'activityContext' => array(
                         array(
                             'type' => 'uri',
                             'value' => $objectUri
@@ -290,12 +291,12 @@ class Xodx_ActivityController extends Xodx_Controller
                         'value' => $actorUri
                     )
                 ),
-                $nsSioc . 'about' => array(
+                /*$nsSioc . 'about' => array(
                     array(
                         'type' => 'uri',
                         'value' => $objectUri
                     )
-                ),
+                ),**/
                 $nsSioc . 'content' => array(
                     array(
                         'type' => 'literal',
@@ -329,7 +330,7 @@ class Xodx_ActivityController extends Xodx_Controller
                 'type' => 'uri',
                 'value' => $contactUri
             );
-            $this->addActivity($actorUri, $nsAair . 'Post', $object);
+            $this->addActivity($actorUri, $nsAair . 'Post', $object, false);
         }
 
         $userController->subscribeToFeed($actorUri, $feedUri);
@@ -397,20 +398,6 @@ class Xodx_ActivityController extends Xodx_Controller
 
         // Queries
 
-        // Get all activities of a Person
-        $personQuery = '' .
-            'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
-            'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
-            'SELECT ?activity ?date ?verb ?object ' .
-            'WHERE { ' .
-            '   ?activity a                   aair:Activity ; ' .
-            '             aair:activityActor  <' . $resourceUri . '> ; ' .
-            '             atom:published      ?date ; ' .
-            '             aair:activityVerb   ?verb ; ' .
-            '             aair:activityObject ?object . ' .
-            '} ' ;
-            //'ORDER BY DESC(?date)';
-
         // Get activity of an ActivityObject and all activities
         // containing objects replying to this ActivityObject
         $objectQuery = '' .
@@ -420,19 +407,11 @@ class Xodx_ActivityController extends Xodx_Controller
             'SELECT ?activity ?date ?verb ?object ?person ' .
             'WHERE { ' .
             '   ?activity a                   aair:Activity ; ' .
-            '             aair:activityObject <' . $resourceUri . '> ; ' .
+            '             ?p <' . $resourceUri . '> ; ' .
             '             aair:activityActor  ?person ; ' .
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
             '             aair:activityObject ?object . ' .
-            /*'OPTIONAL { ' .
-            '   ?activity a                   aair:Activity ; ' .
-            '             aair:activityActor  ?person ; ' .
-            '             atom:published      ?date ; ' .
-            '             aair:activityVerb   ?verb ; ' .
-            '             aair:activityObject ?object . ' .
-            '    ?object  sioc:reply_of       <' . $resourceUri . '> . ' .
-            '} ' .*/
             '} ' .
             'ORDER BY DESC(?date)';
 
@@ -444,21 +423,20 @@ class Xodx_ActivityController extends Xodx_Controller
             'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
             'SELECT ?activity ?date ?verb ?object ?person ' .
             'WHERE { ' .
+            //'    ?activity                    a aair:Activity . ' .
             '    <' . $resourceUri . '>       a aair:Activity ; ' .
             '             aair:activityActor  ?person ; ' .
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
             '             aair:activityObject ?object . ' .
-            /*'OPTIONAL { ' .
-            '    <' . $resourceUri . '>  a    aair:Activity ; ' .
-            '             aair:activityObject ?o . ' .
-            '    ?s       a aair:Activity . ' ;
-            '             aair:activityObject ?object ; ' .
-            '             aair:activityActor  ?person ; ' .
-            '             atom:published      ?date ; ' .
-            '             aair:activityVerb   ?verb ; ' .
-            '    ?o       sioc:reply_of       ?o . ' .
-            '} ' .*/
+            /**' OPTIONAL { ' .
+            '    ?activity a aair:Activity ; ' .
+            '              ?p <' . $resourceUri . '> ; ' .
+            '              aair:activityObject ?object ; ' .
+            '              aair:activityActor  ?person ; ' .
+            '              atom:published      ?date ; ' .
+            '              aair:activityVerb   ?verb ; ' .
+            '} ' . **/
             '} ' .
             'ORDER BY DESC(?date)';
 
@@ -472,15 +450,13 @@ class Xodx_ActivityController extends Xodx_Controller
         $resourceController = $this->_app->getController('Xodx_ResourceController');
         $type = $resourceController->getType($resourceUri);
 
-        $isPerson = false;
         if ($type == $nsAair . 'Activity') {
             $query = $activityQuery;
-        } elseif (($type == $nsSioc . 'Post') || ($type == $nsFoaf . 'Document') ||
-            ($type == $nsFoaf . 'Image'))
-        {
+        } else {
             $query = $objectQuery;
-        } elseif ($type == $nsFoaf . 'PersonalProfileDocument'){
-            $query = $personQuery;
+        }
+        $isPerson = false;
+        if ($type == $nsFoaf . 'PersonalProfileDocument') {
             $isPerson = true;
         }
 
@@ -492,51 +468,45 @@ class Xodx_ActivityController extends Xodx_Controller
             $activityUri = $activity['activity'];
             $verbUri = $activity['verb'];
             $objectUri = $activity['object'];
-
             $activity['date'] = self::_issueE24fix($activity['date']);
-            if ($isPerson) {
-                $activity['person'] = $resourceUri;
-                $title = '"' . $resourceUri . '" did "' . $activity['verb'] . '".';
-            } else {
-                //$title = '"Activity Feed of:."';
-                $title = '"Activity Feed of: ' . $resourceUri . '".';
-            }
+
+            $nameHelper = new Xodx_NameHelper($this->_app);
+            $type = $resourceController->getType($objectUri);
+            $personName = $nameHelper->getName($activity['person']);
+            $title = '"' . $personName . '" did "' . $activity['verb'] . '" a "' . $type . '"';
+
             $activity = array(
                 'title' => $title,
                 'uri' => $activityUri,
-                'author' => 'Natanael',
+                'author' => $personName,
                 'authorUri' => $activity['person'],
                 'pubDate' => $activity['date'],
                 'verb' => $activity['verb'],
                 'object' => $activity['object'],
             );
 
+            $objectResult = $model->sparqlQuery(
+                'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
+                'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
+                'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
+                'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' .
+                'SELECT ?type ?content ?date ' .
+                'WHERE { ' .
+                '   <' . $objectUri . '> a ?type ; ' .
+                '        sioc:created_at ?date . ' .
+                '   OPTIONAL {<' . $objectUri . '> sioc:content ?content .} ' .
+                '} '
+                );
 
-            //if ($verbUri == $nsAair . 'Post' || $verbUri == $nsAair . 'Share') {
-                $objectResult = $model->sparqlQuery(
-                    'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
-                    'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
-                    'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
-                    'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' .
-                    'SELECT ?type ?content ?date ' .
-                    'WHERE { ' .
-                    '   <' . $objectUri . '> a ?type ; ' .
-                    '        sioc:created_at ?date . ' .
-                    '   OPTIONAL {<' . $objectUri . '> sioc:content ?content .} ' .
-                    '} '
-                    );
-
-                if (count($objectResult) > 0) {
-                    $activity['objectType'] = $objectResult[0]['type'];
-                    $activity['objectPubDate'] = self::_issueE24fix($objectResult[0]['date']);
-                    $activity['objectFeed'] = htmlentities($this->_app->getBaseUri() . '
-                    	?c=feed&a=getFeed&uri=') . urlencode($objectUri);
-                    if (!empty($objectResult[0]['content'])) {
-                        $activity['objectContent'] = $objectResult[0]['content'];
-                    }
+            if (count($objectResult) > 0) {
+                $activity['objectType'] = $objectResult[0]['type'];
+                $activity['objectPubDate'] = self::_issueE24fix($objectResult[0]['date']);
+                $activity['objectFeed'] = htmlentities($this->_app->getBaseUri() . '
+                	?c=feed&a=getFeed&uri=') . urlencode($objectUri);
+                if (!empty($objectResult[0]['content'])) {
+                    $activity['objectContent'] = $objectResult[0]['content'];
                 }
-            //} else {
-            //}
+            }
 
             $activities[] = $activity;
         }
