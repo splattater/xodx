@@ -91,8 +91,9 @@ class Xodx_ProfileController extends Xodx_Controller
             $knows = $model->sparqlQuery($contactsQuery);
         }
 
+        $activityController = $this->_app->getController('Xodx_ActivityController');
         $personController = $this->_app->getController('Xodx_PersonController');
-        $activities = $personController->getActivities($personUri);
+        $activities = $activityController->getActivities($personUri);
         $news = $personController->getNotifications($personUri);
 
         $template->profileshowPersonUri = $personUri;
