@@ -21,8 +21,8 @@ class Xodx_FeedController extends Xodx_Controller
 
         if ($uri !== null) {
             //TODO change to ActivityController, get activities of things != person
-            $personController = $this->_app->getController('Xodx_ActivityController');
-            $activities = $personController->getActivities($uri);
+            $activityController = $this->_app->getController('Xodx_ActivityController');
+            $activities = $activityController->getActivities($uri);
 
             $pushController = $this->_app->getController('Xodx_PushController');
 
@@ -47,7 +47,7 @@ class Xodx_FeedController extends Xodx_Controller
             $template->feedUri = $feedUri;
             $template->hub = $pushController->getDefaultHubUrl();
             $isPerson = false;
-            if (($type == $nsSioc . 'Post') || ($type == $nsFoaf . 'Document') ||
+            if (($type == $nsSioc . 'Comment') || ($type == $nsFoaf . 'Document') ||
                 ($type == $nsFoaf . 'Image') || ($type == $nsAair . 'Activity'))
             {
                 $name = 'Test';
