@@ -78,6 +78,7 @@ if ($contact['name'] != null) {
                     <input type="hidden" name="verb" value="Post"  >
                     <input type="hidden" name="type" value="Note" />
                     <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
+                    <input type="hidden" name="reply" value=false />
                     <button class="btn btn-primary" type="submit">Post</button>
                 </form>
             </div>
@@ -88,6 +89,7 @@ if ($contact['name'] != null) {
                     <input type="hidden" name="verb" value="Share" />
                     <input type="hidden" name="type" value="Bookmark" />
                     <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
+                    <input type="hidden" name="reply" value="false" />
                     <button class="btn btn-primary" type="submit">Share</button>
                 </form>
             </div>
@@ -98,6 +100,7 @@ if ($contact['name'] != null) {
                     <input type="hidden" name="verb" value="Post" />
                     <input type="hidden" name="type" value="Photo" />
                     <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
+                    <input type="hidden" name="reply" value=false />
                     <button class="btn btn-primary" type="submit">Share</button>
                 </form>
             </div>
