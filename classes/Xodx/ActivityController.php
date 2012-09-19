@@ -83,7 +83,7 @@ class Xodx_ActivityController extends Xodx_Controller
         $nsXodx = 'http://xodx.org/ns#';
         $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsOv = 'http://open.vocab.org/docs/';
-var_dump($object);
+
         $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
         $now = date('c');
         $postId = md5(rand());
@@ -94,21 +94,32 @@ var_dump($object);
             $type = 'Photo';
             $objectId = $object['fileName'];
             $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+            if (!empty($object['about'])) {
+                $commentId = md5(rand());
+                $commentUri = $this->_app->getBaseUri() . '?c=resource&id=' . $commentId;
+                $object['content'] = $object['about'];
+            }
         } else if ($object['type'] == 'Bookmark') {
             $object['type'] = $nsFoaf . 'Document';
             $type = 'Bookmark';
             //$objectId = md5(rand());
             //$objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
             $objectUri = $object['content'];
+            if (!empty($object['about'])) {
+                    $commentId = md5(rand());
+                    $commentUri = $this->_app->getBaseUri() . '?c=resource&id=' . $commentId;
+                    $object['content'] = $object['about'];
+                }
         } else if ($object['type'] == 'Note') {
-            $object['type'] = $nsSioc . 'Post';
-            $type = 'Note';
+            $object['type'] = $nsSioc . 'Comment';
+            $type = 'Comment';
             $objectId = md5(rand());
             $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
         }
 
+// Creating resources
+        // I. activity resource
         $activity = array(
-            // activity resource
             $activityUri => array(
                 $nsRdf . 'type' => array(
                     array(
@@ -135,76 +146,61 @@ var_dump($object);
                         'value' => $verbUri
                     )
                 ),
-                $nsAair . 'activityObject' => array(
-                    array(
-                        'type' => 'uri',
-                        'value' => $objectUri
-                    )
-                )
+
             ),
         );
-        echo '$objectUri: ' . $objectUri;
-        //If this activity contains a reply, add this statement, too
+
+        //If this activity is a reply, add this statement, too
         if ($object['replyObject'] !== 'false') {
-            echo 'alles gut';
             $activity[$activityUri][$nsAair . 'activityContext'][0]['type'] = 'uri';
             $activity[$activityUri][$nsAair . 'activityContext'][0]['value'] = $object['replyObject'];
         }
-        if ($object['type'] != 'Bookmark') {
-            $actTypeUri = $object['type'];
-            $actContent = $object['content'];
 
-            // general statements of object resource
-            $activity[$objectUri] = array(
-                $nsRdf . 'type' => array(
-                    array(
-                        'type' => 'uri',
-                        'value' => $actTypeUri
-                    )
-                ),
-                $nsSioc . 'created_at' => array(
-                    array(
-                        'type' => 'literal',
-                        'value' => $now,
-                        'datatype' => $nsXsd . 'dateTime'
-                    )
-                ),
-                $nsSioc . 'has_creator' => array(
-                    array(
-                        'type' => 'uri',
-                        'value' => $actorUri
-                    )
-                )
-            );
+        //If activity is posting/sharing a thing by commenting it, add this
+        if ((($type == 'Bookmark') || ($type == 'Photo')) &&
+            (!empty($object['about'])))
+        {
+            $activity[$activityUri][$nsAair . 'activityContext'][0]['type'] = 'uri';
+            $activity[$activityUri][$nsAair . 'activityContext'][0]['value'] = $objectUri;
+            $activity[$activityUri][$nsAair . 'activityObject'][0]['type'] = 'uri';
+            $activity[$activityUri][$nsAair . 'activityObject'][0]['value'] = $commentUri;
+        } else {
+            $activity[$activityUri][$nsAair . 'activityObject'][0]['type'] = 'uri';
+            $activity[$activityUri][$nsAair . 'activityObject'][0]['value'] = $objectUri;
+        }
+
+        if ($type != 'Bookmark') {
+            // II. general statements of object resource
+            $activity[$objectUri][$nsRdf . 'type'][0]['type'] = 'uri';
+            $activity[$objectUri][$nsRdf . 'type'][0]['value'] = $object['type'];
+
+            $activity[$objectUri][$nsSioc . 'created_at'][0]['type'] = 'literal';
+            $activity[$objectUri][$nsSioc . 'created_at'][0]['value'] = $now;
+            $activity[$objectUri][$nsSioc . 'created_at'][0]['datatype'] = $nsXsd . 'dateTime';
+
+            $activity[$objectUri][$nsSioc . 'has_creator'][0]['type'] = 'uri';
+            $activity[$objectUri][$nsSioc . 'has_creator'][0]['value'] = $actorUri;
+
+
             //If this activity contains a reply, add this statement, too
             if ($object['replyObject'] !== 'false') {
                 $activity[$objectUri][$nsSioc . 'reply_of'][0]['type'] = 'uri';
                 $activity[$objectUri][$nsSioc . 'reply_of'][0]['value'] = $object['replyObject'];
             }
-            // Triples of Post resource
-            if ($type == 'Note') {
+            // Triples of Comment resource
+            if ($type == 'Comment') {
                 $activity[$objectUri][$nsSioc . 'content'][0]['type'] = 'literal';
-                $activity[$objectUri][$nsSioc . 'content'][0]['value'] = $actContent;
+                $activity[$objectUri][$nsSioc . 'content'][0]['value'] = $object['content'];
             }
-
             // Triples of photo object
             if ($type == 'Photo') {
-                $activity[$objectUri][$nsOv . 'hasContentType'] = array(
-                    array(
-                        'type' => 'literal',
-                        'value' => $object['mimeType'],
-                    )
-                );
-            }
-            // Triples of Bookmark object
-            if ($type == 'Bookmark') {
-                $activity[$objectUri][$nsAair . 'targetURL'][0]['type'] = 'literal';
-                $activity[$objectUri][$nsAair . 'targetURL'][0]['value'] = $object['content'];
+                $activity[$objectUri][$nsOv . 'hasContentType'][0]['type'] = 'literal';
+                $activity[$objectUri][$nsOv . 'hasContentType'][0]['value'] = $object['mimeType'];
             }
         }
 
         //proceed and subsribe to feed
-        $store->addMultipleStatements($graphUri, $activity);
+        /**$store->addMultipleStatements($graphUri, $activity);
 
         $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
 
@@ -217,121 +213,44 @@ var_dump($object);
         $userController = $this->_app->getController('Xodx_UserController');
         $actorUri = urldecode($actorUri);
 
-        $userController->subscribeToFeed($actorUri, $feedUri);
+        $userController->subscribeToFeed($actorUri, $feedUri);**/
 
-        // create a second activity if post resource about image/bookmark exists
-        // an activity contains only one activityObject, so posting/sharing a(n) image/link
-        // while also giving a comment/description about it, leads to a 2nd activity
-        if ((($type == 'Bookmark') || ($type == 'Photo'))
-            && (!empty($object['about']))
-        ) {
-            $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
+        // III Create comment resource
+        // actually only for posting Images
+        if (!empty($object['about'])) {
             $now = date('c');
-            $activity = array(
-                // The 2nd activity resource
-                $activityUri => array(
-                    $nsRdf . 'type' => array(
-                        array(
-                            'type' => 'uri',
-                            'value' => $nsAair . 'Activity'
-                        )
-                    ),
-                    $nsAtom . 'published' => array(
-                        array(
-                            'type' => 'literal',
-                            'value' => $now,
-                            'datatype' => $nsXsd . 'dateTime'
-                        )
-                    ),
-                    $nsAair . 'activityActor' => array(
-                        array(
-                            'type' => 'uri',
-                            'value' => $actorUri
-                        )
-                    ),
-                    $nsAair . 'activityVerb' => array(
-                        array(
-                            'type' => 'uri',
-                            'value' => $nsAair . 'Post'
-                        )
-                    ),
-                    $nsAair . 'activityObject' => array(
-                        array(
-                            'type' => 'uri',
-                            'value' => $postUri
-                        )
-                    ),
-                    $nsAair . 'activityContext' => array(
-                        array(
-                            'type' => 'uri',
-                            'value' => $objectUri
-                        )
-                    )
-                )
-            );
+            $activity[$commentUri][$nsRdf . 'type'][0]['type'] = 'uri';
+            $activity[$commentUri][$nsRdf . 'type'][0]['value'] = $nsSioc . 'Comment';
 
-            // general statements of 2nd resource
-            $activity[$postUri] = array(
-                $nsRdf . 'type' => array(
-                    array(
-                        'type' => 'uri',
-                        'value' => $nsSioc . 'Comment'
-                    )
-                ),
-                $nsSioc . 'created_at' => array(
-                    array(
-                        'type' => 'literal',
-                        'value' => $now,
-                        'datatype' => $nsXsd . 'dateTime'
-                    )
-                ),
-                $nsSioc . 'has_creator' => array(
-                    array(
-                        'type' => 'uri',
-                        'value' => $actorUri
-                    )
-                ),
-                /*$nsSioc . 'about' => array(
-                    array(
-                        'type' => 'uri',
-                        'value' => $objectUri
-                    )
-                ),**/
-                $nsSioc . 'content' => array(
-                    array(
-                        'type' => 'literal',
-                        'value' => $object['about']
-                    )
-                ),
-            );
+            $activity[$commentUri][$nsSioc . 'created_at'][0]['type'] = 'literal';
+            $activity[$commentUri][$nsSioc . 'created_at'][0]['value'] = $now;
+            $activity[$commentUri][$nsSioc . 'created_at'][0]['datatype'] = $nsXsd . 'dateTime';
 
-            //proceed and subsribe to feed
-            $store->addMultipleStatements($graphUri, $activity);
+            $activity[$commentUri][$nsSioc . 'has_creator'][0]['type'] = 'uri';
+            $activity[$commentUri][$nsSioc . 'has_creator'][0]['value'] = $actorUri;
 
-            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
-
-            if ($config['push.enable'] == true) {
-                $pushController = $this->_app->getController('Xodx_PushController');
-                $pushController->publish($feedUri);
-            }
-
-            // Subscribe user to feed of activityObject (photo, post, note)
-            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
-            $userController = $this->_app->getController('Xodx_UserController');
-            $actorUri = urldecode($actorUri);
-
-            // ping the ressource we replied to
-            // not neccassery
-            $pingbackController = $this->_app->getController('Xodx_PingbackController');
-            $pingbackController->sendPing($objectUri, $postUri);
-
-            // add activity to activity feed of the ressource we replied to
-            $object = array(
-                'type' => 'uri',
-                'value' => $contactUri
-            );
-            $this->addActivity($actorUri, $nsAair . 'Post', $object, false);
+            $activity[$commentUri][$nsSioc . 'content'][0]['type'] = 'literal';
+            $activity[$commentUri][$nsSioc . 'content'][0]['value'] = $object['content'];
         }
+
+        //proceed and subsribe to feed
+        $store->addMultipleStatements($graphUri, $activity);
+
+        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
+
+        if ($config['push.enable'] == true) {
+            $pushController = $this->_app->getController('Xodx_PushController');
+            $pushController->publish($feedUri);
+        }
+
+        // Subscribe user to feed of activityObject (photo, post, note)
+        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
+        $userController = $this->_app->getController('Xodx_UserController');
+        $actorUri = urldecode($actorUri);
+
+        // ping the ressource we replied to
+        $pingbackController = $this->_app->getController('Xodx_PingbackController');
+        $pingbackController->sendPing($objectUri, $postUri);
 
         $userController->subscribeToFeed($actorUri, $feedUri);
 
@@ -421,9 +340,8 @@ var_dump($object);
             'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
             'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
             'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
-            'SELECT ?activity ?date ?verb ?object ?person ' .
+            'SELECT DISTINCT ?activity ?date ?verb ?object ?person ' .
             'WHERE { ' .
-            //'    ?activity                    a aair:Activity . ' .
             '    <' . $resourceUri . '>       a aair:Activity ; ' .
             '             aair:activityActor  ?person ; ' .
             '             atom:published      ?date ; ' .
@@ -465,7 +383,11 @@ var_dump($object);
         $activities = array();
 
         foreach ($activitiesResult as $activity) {
-            $activityUri = $activity['activity'];
+            if ($activity['activity'] === null) {
+                $activityUri = $resourceUri;
+            } else {
+                $activityUri = $activity['activity'];
+            }
             $verbUri = $activity['verb'];
             $objectUri = $activity['object'];
             $activity['date'] = self::_issueE24fix($activity['date']);
