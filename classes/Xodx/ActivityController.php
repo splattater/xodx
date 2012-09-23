@@ -149,7 +149,7 @@ class Xodx_ActivityController extends Xodx_Controller
 
             ),
         );
-
+        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($activityUri);
         //If this activity is a reply, add this statement, too
         if ($object['replyObject'] !== 'false') {
             $activity[$activityUri][$nsAair . 'activityContext'][0]['type'] = 'uri';
@@ -197,6 +197,7 @@ class Xodx_ActivityController extends Xodx_Controller
                 $activity[$objectUri][$nsOv . 'hasContentType'][0]['type'] = 'literal';
                 $activity[$objectUri][$nsOv . 'hasContentType'][0]['value'] = $object['mimeType'];
             }
+            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri) . ';' . $feedUri;
         }
 
         //proceed and subsribe to feed
@@ -231,12 +232,13 @@ class Xodx_ActivityController extends Xodx_Controller
 
             $activity[$commentUri][$nsSioc . 'content'][0]['type'] = 'literal';
             $activity[$commentUri][$nsSioc . 'content'][0]['value'] = $object['content'];
+            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($commentUri) . ';' . $feedUri;
         }
 
         //proceed and subsribe to feed
         $store->addMultipleStatements($graphUri, $activity);
 
-        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
+
 
         if ($config['push.enable'] == true) {
             $pushController = $this->_app->getController('Xodx_PushController');
@@ -244,9 +246,19 @@ class Xodx_ActivityController extends Xodx_Controller
         }
 
         // Subscribe user to feed of activityObject (photo, post, note)
-        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
         $userController = $this->_app->getController('Xodx_UserController');
+        $pushController = $this->_app->getController('Xodx_PushController');
         $actorUri = urldecode($actorUri);
+        $feeds = explode(';', $feedUri);
+
+        foreach ($feeds as $feed) {
+            if ($config['push.enable'] == true) {
+                $pushController->publish($feed);
+            }
+            // Subscribe user to feed of activityObject (photo, post, note)
+            $feed = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
+            $userController->subscribeToFeed($actorUri, $feedUri);
+        }
 
         // ping the ressource we replied to
         $pingbackController = $this->_app->getController('Xodx_PingbackController');
