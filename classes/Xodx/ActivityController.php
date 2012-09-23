@@ -40,6 +40,7 @@ class Xodx_ActivityController extends Xodx_Controller
 
         $store = $bootstrap->getResource('store');
         $model = $bootstrap->getResource('model');
+        $config = $bootstrap->getResource('config');
         $graphUri = $model->getModelIri();
 
         $nsXsd = 'http://www.w3.org/2001/XMLSchema#';
@@ -128,10 +129,12 @@ class Xodx_ActivityController extends Xodx_Controller
 
         $store->addMultipleStatements($graphUri, $activity);
 
-        $pushController = $this->_app->getController('Xodx_PushController');
         $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
 
-        $pushController->publish($feedUri);
+        if ($config['push.enable'] == true) {
+            $pushController = $this->_app->getController('Xodx_PushController');
+            $pushController->publish($feedUri);
+        }
 
         return $feedUri . "\n" . var_export($activity, true);
     }

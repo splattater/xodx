@@ -2,12 +2,14 @@
 
 class Bootstrap
 {
+    private $_app;
     private $_resources;
     private $_model;
     private $_store;
 
-    public function __construct ()
+    public function __construct ($app)
     {
+        $this->_app = $app;
         $this->_resources = array();
     }
 
@@ -27,10 +29,34 @@ class Bootstrap
         return $this->_resources[$resourceName];
     }
 
+    private function initConfig ()
+    {
+        $configPath = $this->_app->getBaseDir() . 'config.ini';
+
+        $configArray = parse_ini_file($configPath, true);
+
+        // TODO merge with some default settings
+        // TODO move most settings into the model
+
+        return $configArray['xodx'];
+    }
+
     private function initStore ()
     {
+        $configPath = $this->_app->getBaseDir() . 'config.ini';
+        $erfurtConfig = null;
+
+        if (is_readable($configPath)) {
+            try {
+                $erfurtConfig = new Zend_Config_Ini($configPath, 'erfurt');
+            } catch (Exception $e) {
+            }
+        }
+
         // Creating an instance of Erfurt API
-        $erfurt = Erfurt_App::getInstance( );
+        // don't autostart it to set config
+        $erfurt = Erfurt_App::getInstance(false);
+        $erfurt->start($erfurtConfig);
 
         // TODO: add the stuff from
         // https://github.com/AKSW/Erfurt/wiki/Internals
@@ -38,7 +64,7 @@ class Bootstrap
         // Authentification on Erfurt (needed for model access)
         $dbUser = $erfurt->getStore()->getDbUser();
         $dbPass = $erfurt->getStore()->getDbPassword();
-        $erfurt->authenticate( $dbUser, $dbPass );
+        $erfurt->authenticate($dbUser, $dbPass);
 
         return $erfurt->getStore();
     }
@@ -47,13 +73,21 @@ class Bootstrap
     {
         $model = null;
         $store = $this->getResource('store');
+        $config = $this->getResource('config');
+
+        $modelUri = $config['xodx.model'];
+
+        if (empty($modelUri)) {
+            throw new Exception('No xodx model configured. Please add "xodx.model" entry to "config.ini".');
+        }
+
         // Get a new model
         try {
             // Create it if it doesn't exist
-            $model = $store->getNewModel('http://localhost/Xodx');
+            $model = $store->getNewModel($modelUri);
         } catch (Erfurt_Store_Exception $e) {
             // Get it if it already exists
-            $model = $store->getModel('http://localhost/Xodx');
+            $model = $store->getModel($modelUri);
         }
 
         return $model;

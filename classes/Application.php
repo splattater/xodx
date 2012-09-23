@@ -10,6 +10,7 @@ class Application
     private $_classNamespace = 'Xodx_';
     private $_bootstrap = null;
     private $_baseUri = null;
+    private $_baseDir = null;
 
     private $_controllers = array();
 
@@ -24,7 +25,7 @@ class Application
     public function getBootstrap()
     {
         if (!isset($this->_bootstrap)) {
-            $this->_bootstrap = new Bootstrap();
+            $this->_bootstrap = new Bootstrap($this);
         }
 
         return $this->_bootstrap;
