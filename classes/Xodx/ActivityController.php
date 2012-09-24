@@ -195,7 +195,7 @@ class Xodx_ActivityController extends Xodx_Controller
             $activity[$objectUri][$nsSioc . 'has_creator'][0]['value'] = $actorUri;
 
             $activity[$objectUri][$nsPingback . 'to'][0]['type'] = 'uri';
-            $activity[$aobjectUri][$nsPingback . 'to'][0]['value'] = $pingbackServer;
+            $activity[$objectUri][$nsPingback . 'to'][0]['value'] = $pingbackServer;
 
 
             //If this activity contains a reply, add this statement, too
@@ -216,21 +216,6 @@ class Xodx_ActivityController extends Xodx_Controller
             $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri) . ';' . $feedUri;
         }
 
-        //proceed and subsribe to feed
-        /**$store->addMultipleStatements($graphUri, $activity);
-
-        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
-
-        if ($config['push.enable'] == true) {
-            $pushController = $this->_app->getController('Xodx_PushController');
-            $pushController->publish($feedUri);
-        }
-        // Subscribe user to feed of activityObject (photo, post, note)
-        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
-        $userController = $this->_app->getController('Xodx_UserController');
-        $actorUri = urldecode($actorUri);
-
-        $userController->subscribeToFeed($actorUri, $feedUri);**/
 
         // III Create comment resource
         // actually only for posting Images
