@@ -83,7 +83,9 @@ class Xodx_ActivityController extends Xodx_Controller
         $nsXodx = 'http://xodx.org/ns#';
         $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsOv = 'http://open.vocab.org/docs/';
+        $nsPingback = 'http://purl.org/net/pingback/';
 
+        $pingbackServer = $this->_app->getBaseUri() . 'index.php?c=pingback&a=ping';
         $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
         $now = date('c');
         $postId = md5(rand());
@@ -117,6 +119,8 @@ class Xodx_ActivityController extends Xodx_Controller
             $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
         }
 
+        $pingbackController = $this->_app->getController('Xodx_PingbackController');
+
 // Creating resources
         // I. activity resource
         $activity = array(
@@ -146,14 +150,23 @@ class Xodx_ActivityController extends Xodx_Controller
                         'value' => $verbUri
                     )
                 ),
+                $nsPingback . 'to' => array(
+                    array(
+                        'type' => 'uri',
+                        'value' => $pingbackServer
+                    )
+                ),
 
             ),
         );
         $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($activityUri);
+
         //If this activity is a reply, add this statement, too
         if ($object['replyObject'] !== 'false') {
             $activity[$activityUri][$nsAair . 'activityContext'][0]['type'] = 'uri';
             $activity[$activityUri][$nsAair . 'activityContext'][0]['value'] = $object['replyObject'];
+            // Ping the object we commented
+            $pingbackController->sendPing($activityUri, $object['replyObject']);
         }
 
         //If activity is posting/sharing a thing by commenting it, add this
@@ -181,6 +194,9 @@ class Xodx_ActivityController extends Xodx_Controller
             $activity[$objectUri][$nsSioc . 'has_creator'][0]['type'] = 'uri';
             $activity[$objectUri][$nsSioc . 'has_creator'][0]['value'] = $actorUri;
 
+            $activity[$objectUri][$nsPingback . 'to'][0]['type'] = 'uri';
+            $activity[$objectUri][$nsPingback . 'to'][0]['value'] = $pingbackServer;
+
 
             //If this activity contains a reply, add this statement, too
             if ($object['replyObject'] !== 'false') {
@@ -200,21 +216,6 @@ class Xodx_ActivityController extends Xodx_Controller
             $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri) . ';' . $feedUri;
         }
 
-        //proceed and subsribe to feed
-        /**$store->addMultipleStatements($graphUri, $activity);
-
-        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
-
-        if ($config['push.enable'] == true) {
-            $pushController = $this->_app->getController('Xodx_PushController');
-            $pushController->publish($feedUri);
-        }
-        // Subscribe user to feed of activityObject (photo, post, note)
-        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
-        $userController = $this->_app->getController('Xodx_UserController');
-        $actorUri = urldecode($actorUri);
-
-        $userController->subscribeToFeed($actorUri, $feedUri);**/
 
         // III Create comment resource
         // actually only for posting Images
@@ -232,6 +233,10 @@ class Xodx_ActivityController extends Xodx_Controller
 
             $activity[$commentUri][$nsSioc . 'content'][0]['type'] = 'literal';
             $activity[$commentUri][$nsSioc . 'content'][0]['value'] = $object['content'];
+
+            $activity[$commentUri][$nsPingback . 'to'][0]['type'] = 'uri';
+            $activity[$commentUri][$nsPingback . 'to'][0]['value'] = $pingbackServer;
+
             $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($commentUri) . ';' . $feedUri;
         }
 
@@ -261,7 +266,6 @@ class Xodx_ActivityController extends Xodx_Controller
         }
 
         // ping the ressource we replied to
-        $pingbackController = $this->_app->getController('Xodx_PingbackController');
         $pingbackController->sendPing($objectUri, $postUri);
 
         $userController->subscribeToFeed($actorUri, $feedUri);
