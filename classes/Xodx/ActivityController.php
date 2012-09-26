@@ -265,12 +265,7 @@ class Xodx_ActivityController extends Xodx_Controller
             $userController->subscribeToFeed($actorUri, $feedUri);
         }
 
-        // ping the ressource we replied to
-        $pingbackController->sendPing($objectUri, $postUri);
-
-        $userController->subscribeToFeed($actorUri, $feedUri);
-
-        return $feedUri . "\n" . var_export($activity, true);
+        //return $feedUri . "\n" . var_export($activity, true);
     }
 
     /**
