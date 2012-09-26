@@ -165,6 +165,8 @@ class Xodx_ActivityController extends Xodx_Controller
         if ($object['replyObject'] !== 'false') {
             $activity[$activityUri][$nsAair . 'activityContext'][0]['type'] = 'uri';
             $activity[$activityUri][$nsAair . 'activityContext'][0]['value'] = $object['replyObject'];
+            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' .
+                urlencode($object['replyObject']) . ';' . $feedUri;
             // Ping the object we commented
             $pingbackController->sendPing($activityUri, $object['replyObject']);
         }
@@ -213,7 +215,8 @@ class Xodx_ActivityController extends Xodx_Controller
                 $activity[$objectUri][$nsOv . 'hasContentType'][0]['type'] = 'literal';
                 $activity[$objectUri][$nsOv . 'hasContentType'][0]['value'] = $object['mimeType'];
             }
-            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri) . ';' . $feedUri;
+            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' .
+                urlencode($objectUri) . ';' . $feedUri;
         }
 
 
@@ -237,7 +240,8 @@ class Xodx_ActivityController extends Xodx_Controller
             $activity[$commentUri][$nsPingback . 'to'][0]['type'] = 'uri';
             $activity[$commentUri][$nsPingback . 'to'][0]['value'] = $pingbackServer;
 
-            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($commentUri) . ';' . $feedUri;
+            $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' .
+                urlencode($commentUri) . ';' . $feedUri;
         }
 
         //proceed and subsribe to feed
