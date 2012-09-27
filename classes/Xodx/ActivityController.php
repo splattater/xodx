@@ -84,6 +84,7 @@ class Xodx_ActivityController extends Xodx_Controller
         $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsOv = 'http://open.vocab.org/docs/';
         $nsPingback = 'http://purl.org/net/pingback/';
+        $nsDssn = 'http://purl.org/net/dssn/';
 
         $pingbackServer = $this->_app->getBaseUri() . 'index.php?c=pingback&a=ping';
         $activityUri = $this->_app->getBaseUri() . '?c=resource&id=' . md5(rand());
@@ -156,6 +157,13 @@ class Xodx_ActivityController extends Xodx_Controller
                         'value' => $pingbackServer
                     )
                 ),
+                $nsDssn . 'activityFeed' => array(
+                    array(
+                        'type' => 'uri',
+                        'value' => $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' .
+                            urlencode($activityUri)
+                    )
+                ),
 
             ),
         );
@@ -199,6 +207,9 @@ class Xodx_ActivityController extends Xodx_Controller
             $activity[$objectUri][$nsPingback . 'to'][0]['type'] = 'uri';
             $activity[$objectUri][$nsPingback . 'to'][0]['value'] = $pingbackServer;
 
+            $activity[$objectUri][$nsDssn . 'activityFeed'][0]['type'] = 'uri';
+            $activity[$objectUri][$nsDssn . 'activityFeed'][0]['value'] = $this->_app->getBaseUri()
+                . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
 
             //If this activity contains a reply, add this statement, too
             if ($object['replyObject'] !== 'false') {
@@ -239,6 +250,11 @@ class Xodx_ActivityController extends Xodx_Controller
 
             $activity[$commentUri][$nsPingback . 'to'][0]['type'] = 'uri';
             $activity[$commentUri][$nsPingback . 'to'][0]['value'] = $pingbackServer;
+
+            $activity[$commentUri][$nsDssn . 'activityFeed'][0]['type'] = 'uri';
+            $activity[$commentUri][$nsDssn . 'activityFeed'][0]['value'] =
+                $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($commentUri) .
+                ';' . $feedUri;
 
             $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' .
                 urlencode($commentUri) . ';' . $feedUri;
