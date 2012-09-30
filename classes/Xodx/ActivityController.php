@@ -280,8 +280,9 @@ class Xodx_ActivityController extends Xodx_Controller
             if ($config['push.enable'] == true) {
                 $pushController->publish($feed);
             }
-            // Subscribe user to feed of activityObject (photo, post, note)
-            //$feed = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
+        }
+
+        foreach ($feeds as $feed) {
             $userController->subscribeToFeed($actorUri, $feed);
         }
 
