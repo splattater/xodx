@@ -267,7 +267,7 @@ class Xodx_ActivityController extends Xodx_Controller
 
         if ($config['push.enable'] == true) {
             $pushController = $this->_app->getController('Xodx_PushController');
-            $pushController->publish($feedUri);
+            //$pushController->publish($feedUri);
         }
 
         // Subscribe user to feed of activityObject (photo, post, note)
@@ -281,8 +281,8 @@ class Xodx_ActivityController extends Xodx_Controller
                 $pushController->publish($feed);
             }
             // Subscribe user to feed of activityObject (photo, post, note)
-            $feed = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
-            $userController->subscribeToFeed($actorUri, $feedUri);
+            //$feed = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($objectUri);
+            $userController->subscribeToFeed($actorUri, $feed);
         }
 
         //return $feedUri . "\n" . var_export($activity, true);
