@@ -176,7 +176,8 @@ class Xodx_ActivityController extends Xodx_Controller
             $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' .
                 urlencode($object['replyObject']) . ';' . $feedUri;
             // Ping the object we commented
-            $pingbackController->sendPing($activityUri, $object['replyObject']);
+            $pingbackController->sendPing($activityUri, $object['replyObject'],
+                'You were pinged from an Anctivity with verb: ' . $verbUri);
         }
 
         //If activity is posting/sharing a thing by commenting it, add this
@@ -213,8 +214,8 @@ class Xodx_ActivityController extends Xodx_Controller
 
             //If this activity contains a reply, add this statement, too
             if ($object['replyObject'] !== 'false') {
-                $activity[$objectUri][$nsSioc . 'reply_of'][0]['type'] = 'uri';
-                $activity[$objectUri][$nsSioc . 'reply_of'][0]['value'] = $object['replyObject'];
+                $activity[$objectUri][$nsRdf . 'about'][0]['type'] = 'uri';
+                $activity[$objectUri][$nsRdf . 'about'][0]['value'] = $object['replyObject'];
             }
             // Triples of Comment resource
             if ($type == 'Comment') {
