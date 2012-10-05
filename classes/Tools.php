@@ -37,4 +37,29 @@ class Tools
 
         return $newStatements;
     }
+
+    /**
+    * Matches an array of mime types against the Accept header in a request.
+    *
+    * @param Zend_Controller_Request_Abstract $request the request
+    * @param array $supportedMimetypes The mime types to match against
+    * @return string
+    */
+    public static function matchMimetypeFromRequest(
+        Zend_Controller_Request_Abstract $request,
+        array $supportedMimetypes
+    )
+    {
+        // get accept header
+        $acceptHeader = strtolower($request->getHeader('Accept'));
+
+        require_once 'Mimeparse.php';
+        try {
+            $match = @Mimeparse::best_match($supportedMimetypes, $acceptHeader);
+        } catch (Exception $e) {
+            $match = '';
+        }
+
+        return $match;
+    }
 }
