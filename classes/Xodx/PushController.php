@@ -222,6 +222,13 @@ class Xodx_PushController extends Xodx_Controller
             // TODO get content type
             $body = $request->getBody();
             $logger->info('push callback: body: ' + $body);
+            $feedUri = $this->_getFeedUriFromBody($body);
+            if ($feedUri) {
+                $feedController = $this->_app->getController('Xodx_FeedController');
+                $feedController->feedToActivity($feedUri);
+            } else {
+                $logger->info('push callback: no feed uri found in body');
+            }
 
             // TODO: process the feed entry in the body
         }
@@ -249,5 +256,16 @@ class Xodx_PushController extends Xodx_Controller
         $subscriptionResult = $model->sparqlQuery($query);
 
         return (count($subscriptionResult) > 0);
+    }
+
+    /**
+     * This fucntion gets a Request Body and tries to find a Feed URL
+     * @param Body of a Request
+     * @return An URL of a Feed
+     */
+    private function _getFeedUriFromBody ($body) {
+        //TODO If getBody() will work, check $body and get feedURI out of it
+        //return $feedURI;
+        return false;
     }
 }
