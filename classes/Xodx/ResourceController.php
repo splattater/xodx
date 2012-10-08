@@ -20,8 +20,8 @@ class Xodx_ResourceController extends Xodx_Controller
 
                 // Array of Accept Header values
         $otherType = array(
-        	'text/html' => 'html',
-            'image/*' => '',
+            'text/html',
+            'image/jpg',
         );
 
         // Array of Accept Header values (keys) for serialised view
@@ -30,33 +30,17 @@ class Xodx_ResourceController extends Xodx_Controller
             'application/json' => 'rdfjson',
             'application/sparql-results+json' => 'rdfjson',
             'application/rdf+xml' => 'rdfxml',
-        	'text/rdf+n3' => 'rdfn3',
+            'text/rdf+n3' => 'rdfn3',
             'application/x-turtle' => 'turtle',
             'application/rdf+xml' => 'rdfxml',
-            'rdfxml' => 'rdfxml',
-            'rdf/xml' => 'rdfxml',
-            'xml' => 'rdfxml',
-            'rdf' => 'rdfxml',
-            'text/plain' => 'rdfxml',
             'application/x-turtle' => 'turtle',
             'text/turtle' => 'turtle',
             'rdf/turtle' => 'turtle',
-            'rdfturtle' => 'turtle',
-            'turtle' => 'turtle',
-            'ttl' => 'turtle',
-            'nt' => 'turtle',
-            'ntriple' => 'turtle',
-            'rdf/n3' => 'rdfn3',
-            'rdfn3' => 'rdfn3',
-            'n3' => 'rdfn3',
-            'application/json' => 'rdfjson',
-            'json' => 'rdfjson',
-            'rdfjson' => 'rdfjson',
             'rdf/json' => 'rdfjson'
         );
 
         $match = Tools::matchMimetypeFromRequest($request, array_merge(
-            $rdfType, $otherType));
+             $otherType));
         $template->disableLayout();
         $template->setRawContent('');
         if ($match != '') {
