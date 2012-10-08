@@ -44,7 +44,7 @@ class Xodx_ResourceController extends Xodx_Controller
         $template->disableLayout();
         $template->setRawContent('');
         if ($match != '') {
-            if (array_key_exists($match, $rdfTypes)) {
+            if (array_key_exists($match, $rdfType)) {
                 header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=rdf&id=' .
                 $objectId . '&format=' . $rdfType[$match]);
                 return $template;
