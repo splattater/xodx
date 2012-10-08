@@ -78,7 +78,7 @@ class Xodx_ApplicationController extends Xodx_Controller
                 }
 
                 // create new person
-                $newPersonUri = $this->_app->getBaseUri() . '?c=person&a=get&username=' . urlencode($username);
+                $newPersonUri = $this->_app->getBaseUri() . '?c=person&id=' . urlencode($username);
                 $newPerson = array(
                     $newPersonUri => array(
                         $nsRdf . 'type' => array(
