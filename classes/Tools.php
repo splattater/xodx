@@ -37,4 +37,30 @@ class Tools
 
         return $newStatements;
     }
+
+    /**
+    * Matches an array of mime types against the Accept header in a request.
+    *
+    * @param Xodx_Request $request the request
+    * @param array $supportedMimetypes The mime types to match against
+    * @return string
+    */
+    public static function matchMimetypeFromRequest(
+        Xodx_Request $request,
+        array $supportedMimetypes
+    )
+    {
+        // get accept header
+        $header = $request->getHeader();
+        $acceptHeader = strtolower($header['Accept']);
+
+        require_once 'Mimeparse.php';
+        try {
+            $match = @Mimeparse::best_match($supportedMimetypes, $acceptHeader);
+        } catch (Exception $e) {
+            $match = '';
+        }
+
+        return $match;
+    }
 }
