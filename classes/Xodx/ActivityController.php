@@ -440,6 +440,7 @@ class Xodx_ActivityController extends Xodx_Controller
                 'pubDate' => $activity['date'],
                 'verb' => $activity['verb'],
                 'object' => $activity['object'],
+                'type' => $type,
             );
 
             $objectResult = $model->sparqlQuery(

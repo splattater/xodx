@@ -240,9 +240,8 @@ class Xodx_PersonController extends Xodx_ResourceController
         }
 
         $activityController = $this->_app->getController('Xodx_ActivityController');
-        $personController = $this->_app->getController('Xodx_PersonController');
         $activities = $activityController->getActivities($personUri);
-        $news = $personController->getNotifications($personUri);
+        $news = $this->getNotifications($personUri);
 
         $template->profileshowPersonUri = $personUri;
         $template->profileshowDepiction = $profile[0]['depiction'];
