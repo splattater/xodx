@@ -21,8 +21,8 @@ class Xodx_ResourceController extends Xodx_Controller
 
                 // Array of Accept Header values
         $otherType = array(
-            'text/html',
-            'image/jpg',
+            'text/html' => 'html',
+            'image/jpg' => 'imagejpg',
         );
 
         // Array of Accept Header values (keys) for serialised view
@@ -39,8 +39,8 @@ class Xodx_ResourceController extends Xodx_Controller
             'rdf/json' => 'rdfjson'
         );
 
-        $supportedTypes = array_merge(array_keys($rdfType), $otherType);
-        $match = Tools::matchMimetypeFromRequest($request, $supportedTypes);
+        $supportedTypes = array_merge($rdfType, $otherType);
+        $match = Tools::matchMimetypeFromRequest($request, array_keys($supportedTypes));
         $template->disableLayout();
         $template->setRawContent('');
         if ($match != '') {

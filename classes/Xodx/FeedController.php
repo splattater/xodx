@@ -70,14 +70,15 @@ class Xodx_FeedController extends Xodx_Controller
     public function feedToActivity ($feedData)
     {
         // load feedxml and display activities
-        $Feed = DSSN_Activity_Feed_Factory::newFromXml($feedData);
+        $feed = DSSN_Activity_Feed_Factory::newFromXml($feedData);
         $activityController = $this->_app->getController('Xodx_ActivityController');
         $nsXodx = 'http://xodx.org/ns#';
         $nsXsd = 'http://www.w3.org/2001/XMLSchema#';
 
-        foreach ($Feed->getActivities() as $key => $activity) {
+        foreach ($feed->getActivities() as $key => $activity) {
             $date = $activity->getPublished;
-            $title = $activity->getTitle();
+            //$title = $activity->getTitle();
+            $title = 'Imported with DSSN-LIB';
             $actorUri = $activity->getActor();
             $verbUri = $activity->getVerb();
             $objectUri = $activity->getObject();
