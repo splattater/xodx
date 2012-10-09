@@ -29,6 +29,7 @@ class Xodx_ApplicationController extends Xodx_Controller
         $nsFoaf = 'http://xmlns.com/foaf/0.1/';
         $nsSioc = 'http://rdfs.org/sioc/ns#';
         $nsXodx = 'http://example.org/voc/xodx/';
+        $nsDssn = 'http://purl.org/net/dssn/';
 
         $bootstrap = $this->_app->getBootstrap();
         $model = $bootstrap->getResource('model');
@@ -79,6 +80,8 @@ class Xodx_ApplicationController extends Xodx_Controller
 
                 // create new person
                 $newPersonUri = $this->_app->getBaseUri() . '?c=person&id=' . urlencode($username);
+                $newPersonFeed = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri='
+                    . urlencode($newPersonUri);
                 $newPerson = array(
                     $newPersonUri => array(
                         $nsRdf . 'type' => array(
@@ -91,6 +94,13 @@ class Xodx_ApplicationController extends Xodx_Controller
                             array(
                                 'type' => 'literal',
                                 'value' => $username
+                            )
+                        ),
+                        $nsDssn . 'activityFeed' => array(
+                            array(
+                                'type' => 'uri',
+                                'value' => $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' .
+                                    urlencode($activityUri)
                             )
                         ),
                     )
