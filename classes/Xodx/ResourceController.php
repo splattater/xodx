@@ -14,6 +14,7 @@ class Xodx_ResourceController extends Xodx_Controller
         $bootstrap = $this->_app->getBootstrap();
         $request = $bootstrap->getResource('request');
         $objectId = $request->getValue('id', 'get');
+        $controller = $request->getValue('c', 'get');
         //$header = $request->getHeader();
         //$accept = explode(',',$header['Accept']);
         header('HTTP/1.1 302 Found');
@@ -45,16 +46,22 @@ class Xodx_ResourceController extends Xodx_Controller
         $template->setRawContent('');
         if ($match != '') {
             if (array_key_exists($match, $rdfType)) {
-                header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=rdf&id=' .
-                $objectId . '&format=' . $rdfType[$match]);
+                header('Location: ' . $this->_app->getBaseUri() . '?c=' . $controller .
+                '&a=rdf&id=' . $objectId . '&format=' . $rdfType[$match]);
                 return $template;
             } else if (strpos($match, 'image') !== false) {
-                header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=img&id=' .
-                $objectId);
+                header('Location: ' . $this->_app->getBaseUri() . '?c=' . $controller .
+                '&a=img&id=' . $objectId);
                 return $template;
             } else if (strpos($match, 'text') !== false) {
-                header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=show&id=' .
-                $objectId);
+                // TODO change name of showAction in ProfileController so it won't be overwritten
+                if ($controller == 'profile') {
+                    header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=show&id=' .
+                    $objectId);
+                } else {
+                    header('Location: ' . $this->_app->getBaseUri() . '?c=' . $controller .
+                    '&a=show&id=' . $objectId);
+                }
                 return $template;
             }
         }
