@@ -128,7 +128,7 @@ class Xodx_PushController extends Xodx_Controller
                     throw new Exception('No hub found in feed');
                 }
             } else {
-                $logger->info('push subscribe: subscription error: ' + $result);
+                $logger->info('push subscribe: subscription error: ' . $result);
                 throw new Exception('Error when requesting feed');
             }
         }
@@ -221,8 +221,9 @@ class Xodx_PushController extends Xodx_Controller
 
             // TODO get content type
             $body = $request->getBody();
-            $logger->info('push callback: body: ' + $body);
-
+            $logger->info('push callback: body: ' . $body);
+            $feedController = $this->_app->getController('Xodx_FeedController');
+            $feedController->feedToActivity($body);
             // TODO: process the feed entry in the body
         }
 
@@ -249,5 +250,16 @@ class Xodx_PushController extends Xodx_Controller
         $subscriptionResult = $model->sparqlQuery($query);
 
         return (count($subscriptionResult) > 0);
+    }
+
+    /**
+     * This fucntion gets a Request Body and tries to find a Feed URL
+     * @param Body of a Request
+     * @return An URL of a Feed
+     */
+    private function _getFeedUriFromBody ($body) {
+        //TODO If getBody() will work, check $body and get feedURI out of it
+        //return $feedURI;
+        return false;
     }
 }

@@ -6,8 +6,7 @@ class Xodx_ResourceController extends Xodx_Controller
 {
     /**
      *
-     * indexAction decides to show a html or a serialized
-     * view of a resource if no action is given
+     * indexAction decides to show a html or a serialized view of a resource if no action is given
      * @param unknown_type $template
      */
     public function indexAction($template)
@@ -15,30 +14,58 @@ class Xodx_ResourceController extends Xodx_Controller
         $bootstrap = $this->_app->getBootstrap();
         $request = $bootstrap->getResource('request');
         $objectId = $request->getValue('id', 'get');
-        $header = $request->getHeader();
-        $accept = explode(',',$header['Accept']);
+        $controller = $request->getValue('c', 'get');
+        //$header = $request->getHeader();
+        //$accept = explode(',',$header['Accept']);
         header('HTTP/1.1 302 Found');
 
+                // Array of Accept Header values
+        $otherType = array(
+            'text/html' => 'html',
+            'image/jpg' => 'imagejpg',
+        );
+
+        // Array of Accept Header values (keys) for serialised view
+        $rdfType = array(
+            'application/sparql-results+xml' => 'rdfxml',
+            'application/json' => 'rdfjson',
+            'application/sparql-results+json' => 'rdfjson',
+            'application/rdf+xml' => 'rdfxml',
+            'text/rdf+n3' => 'rdfn3',
+            'application/x-turtle' => 'turtle',
+            'application/rdf+xml' => 'rdfxml',
+            'text/turtle' => 'turtle',
+            'rdf/turtle' => 'turtle',
+            'rdf/json' => 'rdfjson'
+        );
+
+        $supportedTypes = array_merge($rdfType, $otherType);
+        $match = Tools::matchMimetypeFromRequest($request, array_keys($supportedTypes));
         $template->disableLayout();
         $template->setRawContent('');
-        foreach ($accept as $contentType) {
-            $contentType = explode(';', $contentType);
-            if (stristr($contentType[0], 'html')) {
-                //redirect to show action
-                break;
-            } else if (stristr($contentType[0], 'rdf')) {
-                //redirect to rdf action
-                header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=rdf&id=' . $objectId . '&format=rdfxml');
+        if ($match != '') {
+            if (array_key_exists($match, $rdfType)) {
+                header('Location: ' . $this->_app->getBaseUri() . '?c=' . $controller .
+                '&a=rdf&id=' . $objectId . '&mime=' . urlencode($match));
                 return $template;
-            } else if (stristr($contentType[0], 'turtle')) {
-                header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=rdf&id=' . $objectId . '&format=turtle');
+            } else if (strpos($match, 'image') !== false) {
+                header('Location: ' . $this->_app->getBaseUri() . '?c=' . $controller .
+                '&a=img&id=' . $objectId);
                 return $template;
-            } else if (stristr($contentType[0], 'image')) {
-                header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=img&id=' . $objectId);
+            } else if (strpos($match, 'text') !== false) {
+                // TODO change name of showAction in ProfileController so it won't be overwritten
+                if ($controller == 'profile') {
+                    header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=show&id=' .
+                    $objectId);
+                } else {
+                    header('Location: ' . $this->_app->getBaseUri() . '?c=' . $controller .
+                    '&a=show&id=' . $objectId);
+                }
                 return $template;
             }
         }
-        header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=show&id=' . $objectId);
+        // default
+        //header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=show&id=' . $objectId);
         return $template;
     }
     /**
@@ -53,7 +80,8 @@ class Xodx_ResourceController extends Xodx_Controller
         $request = $bootstrap->getResource('request');
 
         $objectId = $request->getValue('id', 'get');
-        $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+        $controller = $request->getValue('c', 'get');
+        $objectUri = $this->_app->getBaseUri() . '?c=' . $controller . '&id=' . $objectId;
 
         $query = '' .
             'SELECT ?p ?o ' .
@@ -90,37 +118,17 @@ class Xodx_ResourceController extends Xodx_Controller
         $request = $bootstrap->getResource('request');
 
         $objectId = $request->getValue('id', 'get');
-        $format = $request->getValue('format', 'get');
-        $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+        $mime = $request->getValue('mime', 'get');
+        $controller = $request->getValue('c', 'get');
+        $objectUri = $this->_app->getBaseUri() . '?c=' . $controller . '&id=' . $objectId;
 
-        $filename = '';
-        switch ($format) {
-            case 'rdfxml':
-                $contentType = 'application/rdf+xml';
-                $filename .= '.rdf';
-                break;
-            case 'rdfn3':
-                $contentType = 'text/rdf+n3';
-                $filename .= '.n3';
-                break;
-            case 'rdfjson':
-                $contentType = 'application/json';
-                $filename .= '.json';
-                break;
-            case 'turtle':
-                $contentType = 'application/x-turtle';
-                $filename .= '.ttl';
-                break;
-            default:
-                $contentType = 'application/x-turtle';
-                $filename .= '.ttl';
-        }
+        //$format = Erfurt_Syntax_RdfSerializer::normalizeFormat($format);
 
         $modelUri = $model->getModelIri();
-        $format = Erfurt_Syntax_RdfSerializer::normalizeFormat($format);
+        $format = Erfurt_Syntax_RdfSerializer::normalizeFormat($mime);
         $serializer = Erfurt_Syntax_RdfSerializer::rdfSerializerWithFormat($format);
         $rdfData = $serializer->serializeResourceToString($objectUri, $modelUri, false, true, array());
-        header('Content-type: ' . $contentType);
+        header('Content-type: ' . $mime);
 
         $template->disableLayout();
         $template->setRawContent($rdfData);
@@ -142,7 +150,8 @@ class Xodx_ResourceController extends Xodx_Controller
         $request = $bootstrap->getResource('request');
 
         $objectId = $request->getValue('id', 'get');
-        $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+        $controller = $request->getValue('c', 'get');
+        $objectUri = $this->_app->getBaseUri() . '?c=' . $controller . '&id=' . $objectId;
 
         $query = '' .
             'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' .

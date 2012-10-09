@@ -1,6 +1,6 @@
 <?php
 
-class Xodx_PersonController extends Xodx_Controller
+class Xodx_PersonController extends Xodx_ResourceController
 {
     private $_persons = array();
 

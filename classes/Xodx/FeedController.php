@@ -48,7 +48,7 @@ class Xodx_FeedController extends Xodx_Controller
             $template->hub = $pushController->getDefaultHubUrl();
             $isPerson = false;
             if (($type == $nsSioc . 'Comment') || ($type == $nsFoaf . 'Document') ||
-                ($type == $nsFoaf . 'Image') || ($type == $nsAair . 'Activity'))
+            ($type == $nsFoaf . 'Image') || ($type == $nsAair . 'Activity'))
             {
                 $name = 'Test';
             } else {
@@ -69,42 +69,21 @@ class Xodx_FeedController extends Xodx_Controller
      */
     public function feedToActivity ($feedData)
     {
-        $nsAtom = 'http://www.w3.org/2005/Atom';
-        $nsAair = 'http://activitystrea.ms/schema/1.0/';
-
-        $xml = simplexml_load_string($feedData);
-
-        $atom = $xml->children($nsAtom);
-        $aair = $xml->children($nsAair);
-
-        if (count($atom) < 1 && count($aair) < 1) {
-            throw new Exception('Feed is empty');
-        } else {
-            $activities = array();
-            foreach ($atom->entry as $entry) {
-                // getActivitystrea.ms namespace
-                $entryAtom = $entry->children($nsAtom);
-                $entryAair = $entry->children($nsAair);
-
-                $date = (string) $entryAtom->published;
-
-                $actorNode = $entryAtom->author;
-                $actorAtom = $actorNode->children($nsAtom);
-                $actorUri = (string) $actorAtom->uri;
-
-                $verbUri = (string) $entryAair->verb;
-
-                $objectNode = $entryAair->object;
-                $objectAtom = $objectNode->children($nsAtom);
-                $objectUri = (string) $objectAtom->id;
-
-                // TODO create new Activity with the data specified in the entry
-                $activities[] = new Activity(null, $actorUri, $verbUri, $objectUri, $date);
-            }
-        }
-
+        // load feedxml and display activities
+        $feed = DSSN_Activity_Feed_Factory::newFromXml($feedData);
         $activityController = $this->_app->getController('Xodx_ActivityController');
+        $nsXodx = 'http://xodx.org/ns#';
+        $nsXsd = 'http://www.w3.org/2001/XMLSchema#';
 
-        $activityController->addActivities($activities);
+        foreach ($feed->getActivities() as $key => $activity) {
+            $date = $activity->getPublished;
+            //$title = $activity->getTitle();
+            $title = 'Imported with DSSN-LIB';
+            $actorUri = $activity->getActor();
+            $verbUri = $activity->getVerb();
+            $objectUri = $activity->getObject();
+            $activity[] = new Activity(null, $actorUri, $verbUri, $objectUri, $date);
+            $activityController->addActivities($activity);
+        }
     }
 }
