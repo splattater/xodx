@@ -120,7 +120,7 @@ class Xodx_ApplicationController extends Xodx_Controller
 
                 $store->addMultipleStatements($graphUri, $newPerson);
 
-                $newUserUri = $this->_app->getBaseUri() . '?c=user&a=get&username=' . urlencode($username);
+                $newUserUri = $this->_app->getBaseUri() . '?c=user&a=id&username=' . urlencode($username);
                 $newUser = array(
                      $newUserUri => array(
                         $nsRdf . 'type' => array(
@@ -152,7 +152,7 @@ class Xodx_ApplicationController extends Xodx_Controller
                 $store->addMultipleStatements($graphUri, $newUser);
 
                 $newProfile = array(
-                    $this->_app->getBaseUri() . '?c=profile&a=get&username=' . urlencode($username) => array(
+                    $this->_app->getBaseUri() . '?c=profile&id=' . urlencode($username) => array(
                         $nsRdf . 'type' => array(
                             array(
                                 'type' => 'uri',
