@@ -4,7 +4,7 @@
     <h3><?= $this->profileshowName ?></h3>
     <?php if(isset($this->profileshowNick)) : ?> <h4><?= $this->profileshowNick ?></h4> <?php endif; ?>
     <h5>knows ...</h5>
-    <form method="post" action="?c=profile&a=addfriend">
+    <form method="post" action="?c=profile&amp;a=addfriend">
     <ul>
 <?php
 foreach($this->profileshowKnows as $contact) :
@@ -18,7 +18,7 @@ if ($contact['name'] != null) {
 <?php endforeach; ?>
         <li>
             <div class="input-append">
-                <input type="hidden" name="person" value="<?= $this->profileshowPersonUri ?>" />
+                <input type="hidden" name="person" value="<?= htmlentities($this->profileshowPersonUri) ?>" />
                 <input type="text" name="friend" /><button class="btn btn-primary" type="submit">Add</button>
             </div>
         </li>
@@ -38,6 +38,7 @@ if ($contact['name'] != null) {
         <!-- <a href="<?= $activity['uri'] ?>"><strong><?= $activity['title'] ?></strong></a><br /> -->
       </p>
       <p>
+      <form method="post" action="?c=activity&amp;a=replyForm">
         <a href="<?= htmlentities($activity['authorUri']) ?>">
             <?= htmlentities($activity['author']) ?>
         </a>
@@ -48,9 +49,8 @@ if ($contact['name'] != null) {
             <?= Tools::getSpokenWord($activity['type']) ?>
         </a> at <?= $activity['pubDate'] ?>
         <?php endif; ?>
-            <form method="post" action="?c=activity&a=replyForm">
-                <input type="hidden" name="object" value="<?= $activity['object']?>" />
-                <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
+                <input type="hidden" name="object" value="<?= htmlentities($activity['object'])?>" />
+                <input type="hidden" name="actor" value="<?= htmlentities($this->profileshowPersonUri) ?>" />
                 <button class="btn btn-mini" type="submit">Reply</button>
             </form>
     </div>
@@ -71,7 +71,7 @@ if ($contact['name'] != null) {
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="status">
-                <form method="post" action="?c=activity&a=addactivity">
+                <form method="post" action="?c=activity&amp;a=addactivity">
                     <textarea name="content"></textarea>
                     <input type="hidden" name="verb" value="Post"  >
                     <input type="hidden" name="type" value="Note" />
@@ -81,8 +81,8 @@ if ($contact['name'] != null) {
                 </form>
             </div>
             <div class="tab-pane" id="link">
-                <form method="post" action="?c=activity&a=addactivity">
-                    <input type="text" name="content" /></br>
+                <form method="post" action="?c=activity&amp;a=addactivity">
+                    <input type="text" name="content" />
                     <textarea name="about"></textarea>
                     <input type="hidden" name="verb" value="Post" />
                     <input type="hidden" name="type" value="Bookmark" />
@@ -92,8 +92,8 @@ if ($contact['name'] != null) {
                 </form>
             </div>
             <div class="tab-pane" id="photo">
-                <form enctype="multipart/form-data" method="post" action="?c=activity&a=addactivity">
-                    <input type="file" name="content"/></br>
+                <form enctype="multipart/form-data" method="post" action="?c=activity&amp;a=addactivity">
+                    <input type="file" name="content"/>
                     <textarea name="about"></textarea>
                     <input type="hidden" name="verb" value="Post" />
                     <input type="hidden" name="type" value="Photo" />
@@ -104,7 +104,7 @@ if ($contact['name'] != null) {
             </div>
         </div>
     <a href="?c=feed&amp;a=getFeed&amp;uri=<?= urlencode($this->profileshowPersonUri) ?>">Show Activity Feed</a>
-    <form method="post" action="?c=user&a=subscribe">
+    <form method="post" action="?c=user&amp;a=subscribe">
         <div class="input-append">
             <input type="hidden" name="user" value="<?= $this->profileshowPersonUri ?>" />
             <input type="text" name="feeduri" /><button class="btn btn-primary" type="submit">Subscribe</button>
