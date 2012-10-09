@@ -222,14 +222,8 @@ class Xodx_PushController extends Xodx_Controller
             // TODO get content type
             $body = $request->getBody();
             $logger->info('push callback: body: ' . $body);
-            $feedUri = $this->_getFeedUriFromBody($body);
-            if ($feedUri) {
-                $feedController = $this->_app->getController('Xodx_FeedController');
-                $feedController->feedToActivity($feedUri);
-            } else {
-                $logger->info('push callback: no feed uri found in body');
-            }
-
+            $feedController = $this->_app->getController('Xodx_FeedController');
+            $feedController->feedToActivity($body);
             // TODO: process the feed entry in the body
         }
 
