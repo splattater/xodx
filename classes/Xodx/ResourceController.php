@@ -123,11 +123,7 @@ class Xodx_ResourceController extends Xodx_Controller
         $controller = $request->getValue('c', 'get');
         $objectUri = $this->_app->getBaseUri() . '?c=' . $controller . '&id=' . $objectId;
 
-        if (in_array($mime, $this->rdfTypes)) {
-            $format = Erfurt_Syntax_RdfSerializer::normalizeFormat($mime);
-        } else {
-            $format = Erfurt_Syntax_RdfSerializer::normalizeFormat('application/x-turtle');
-        }
+        //$format = Erfurt_Syntax_RdfSerializer::normalizeFormat($format);
 
         $modelUri = $model->getModelIri();
 
