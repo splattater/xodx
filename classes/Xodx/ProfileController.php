@@ -2,7 +2,7 @@
 
 require_once 'Tools.php';
 
-class Xodx_ProfileController extends Xodx_Controller
+class Xodx_ProfileController extends Xodx_ResourceController
 {
     public function listAction($template)
     {
