@@ -46,7 +46,7 @@ class Xodx_ResourceController extends Xodx_Controller
         if ($match != '') {
             if (array_key_exists($match, $rdfType)) {
                 header('Location: ' . $this->_app->getBaseUri() . '?c=' . $controller .
-                '&a=rdf&id=' . $objectId . '&format=' . $rdfType[$match]);
+                '&a=rdf&id=' . $objectId . '&mime=' . urlencode($match));
                 return $template;
             } else if (strpos($match, 'image') !== false) {
                 header('Location: ' . $this->_app->getBaseUri() . '?c=' . $controller .
@@ -118,13 +118,14 @@ class Xodx_ResourceController extends Xodx_Controller
         $request = $bootstrap->getResource('request');
 
         $objectId = $request->getValue('id', 'get');
-        $format = $request->getValue('format', 'get');
+        $mime = $request->getValue('mime', 'get');
         $controller = $request->getValue('c', 'get');
         $objectUri = $this->_app->getBaseUri() . '?c=' . $controller . '&id=' . $objectId;
 
         //$format = Erfurt_Syntax_RdfSerializer::normalizeFormat($format);
 
         $modelUri = $model->getModelIri();
+        $format = Erfurt_Syntax_RdfSerializer::normalizeFormat($mime);
         $serializer = Erfurt_Syntax_RdfSerializer::rdfSerializerWithFormat($format);
         $rdfData = $serializer->serializeResourceToString($objectUri, $modelUri, false, true, array());
         header('Content-type: ' . $mime);
