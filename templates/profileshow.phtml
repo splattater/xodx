@@ -35,21 +35,19 @@ if ($contact['name'] != null) {
     <?php foreach ($this->profileshowActivities as $activity) : ?>
     <div class="activity">
       <p>
-        <a href="<?= $activity['uri'] ?>"><strong><?= $activity['title'] ?></strong></a><br />
-        <em><?= $activity['pubDate'] ?></em>
+        <!-- <a href="<?= $activity['uri'] ?>"><strong><?= $activity['title'] ?></strong></a><br /> -->
       </p>
       <p>
         <a href="<?= htmlentities($activity['authorUri']) ?>">
-            <?= htmlentities($activity['authorUri']) ?>
+            <?= htmlentities($activity['author']) ?>
         </a>
-        did <a href="<?= htmlentities($activity['verb']) ?>"><?= htmlentities($activity['verb']) ?></a>
+        <a href="<?= htmlentities($activity['verb']) ?>"><?= Tools::getSpokenWord($activity['verb']) ?></a>
 
         <?php if (isset($activity['objectType'])) : ?>
         a <a href="<?= htmlentities($activity['object']) ?>">
-            <?= htmlentities($activity['object']) ?>
-        </a>
+            <?= Tools::getSpokenWord($activity['type']) ?>
+        </a> at <?= $activity['pubDate'] ?>
         <?php endif; ?>
-        : <a href="<?= htmlentities($activity['object']) ?>"><?= htmlentities($activity['object']) ?></a>
             <form method="post" action="?c=activity&a=replyForm">
                 <input type="hidden" name="object" value="<?= $activity['object']?>" />
                 <input type="hidden" name="actor" value="<?= $this->profileshowPersonUri ?>" />
