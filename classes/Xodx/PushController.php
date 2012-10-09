@@ -128,7 +128,7 @@ class Xodx_PushController extends Xodx_Controller
                     throw new Exception('No hub found in feed');
                 }
             } else {
-                $logger->info('push subscribe: subscription error: ' + $result);
+                $logger->info('push subscribe: subscription error: ' . $result);
                 throw new Exception('Error when requesting feed');
             }
         }
@@ -221,7 +221,7 @@ class Xodx_PushController extends Xodx_Controller
 
             // TODO get content type
             $body = $request->getBody();
-            $logger->info('push callback: body: ' + $body);
+            $logger->info('push callback: body: ' . $body);
             $feedUri = $this->_getFeedUriFromBody($body);
             if ($feedUri) {
                 $feedController = $this->_app->getController('Xodx_FeedController');
