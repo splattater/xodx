@@ -34,14 +34,13 @@ class Xodx_ResourceController extends Xodx_Controller
             'text/rdf+n3' => 'rdfn3',
             'application/x-turtle' => 'turtle',
             'application/rdf+xml' => 'rdfxml',
-            'application/x-turtle' => 'turtle',
             'text/turtle' => 'turtle',
             'rdf/turtle' => 'turtle',
             'rdf/json' => 'rdfjson'
         );
 
-        $match = Tools::matchMimetypeFromRequest($request, array_merge(
-             $otherType));
+        $supportedTypes = array_merge(array_keys($rdfType), $otherType);
+        $match = Tools::matchMimetypeFromRequest($request, $supportedTypes);
         $template->disableLayout();
         $template->setRawContent('');
         if ($match != '') {
@@ -126,7 +125,6 @@ class Xodx_ResourceController extends Xodx_Controller
         //$format = Erfurt_Syntax_RdfSerializer::normalizeFormat($format);
 
         $modelUri = $model->getModelIri();
-
         $serializer = Erfurt_Syntax_RdfSerializer::rdfSerializerWithFormat($format);
         $rdfData = $serializer->serializeResourceToString($objectUri, $modelUri, false, true, array());
         header('Content-type: ' . $mime);
