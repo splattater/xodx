@@ -81,7 +81,8 @@ class Xodx_ResourceController extends Xodx_Controller
         $request = $bootstrap->getResource('request');
 
         $objectId = $request->getValue('id', 'get');
-        $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+        $controller = $request->getValue('c', 'get');
+        $objectUri = $this->_app->getBaseUri() . '?c=' . $controller . '&id=' . $objectId;
 
         $query = '' .
             'SELECT ?p ?o ' .
@@ -119,7 +120,8 @@ class Xodx_ResourceController extends Xodx_Controller
 
         $objectId = $request->getValue('id', 'get');
         $format = $request->getValue('format', 'get');
-        $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+        $controller = $request->getValue('c', 'get');
+        $objectUri = $this->_app->getBaseUri() . '?c=' . $controller . '&id=' . $objectId;
 
         if (in_array($mime, $this->rdfTypes)) {
             $format = Erfurt_Syntax_RdfSerializer::normalizeFormat($mime);
@@ -153,7 +155,8 @@ class Xodx_ResourceController extends Xodx_Controller
         $request = $bootstrap->getResource('request');
 
         $objectId = $request->getValue('id', 'get');
-        $objectUri = $this->_app->getBaseUri() . '?c=resource&id=' . $objectId;
+        $controller = $request->getValue('c', 'get');
+        $objectUri = $this->_app->getBaseUri() . '?c=' . $controller . '&id=' . $objectId;
 
         $query = '' .
             'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' .
