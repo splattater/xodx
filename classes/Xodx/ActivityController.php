@@ -91,6 +91,7 @@ class Xodx_ActivityController extends Xodx_Controller
         $now = date('c');
         $postId = md5(rand());
         $postUri = $this->_app->getBaseUri() . '?c=resource&id=' . $postId;
+        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($actorUri);
         // Take photo's filename as objectname
         if ($object['type'] == 'Photo') {
             $object['type'] = $nsFoaf . 'Image';
@@ -167,7 +168,8 @@ class Xodx_ActivityController extends Xodx_Controller
 
             ),
         );
-        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($activityUri);
+        $feedUri = $this->_app->getBaseUri() . '?c=feed&a=getFeed&uri=' . urlencode($activityUri) .
+        ';' . $feedUri;
 
         //If this activity is a reply, add this statement, too
         if ($object['replyObject'] !== 'false') {
