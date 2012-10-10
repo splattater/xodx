@@ -54,13 +54,8 @@ class Xodx_ResourceController extends Xodx_Controller
                 return $template;
             } else if (strpos($match, 'text') !== false) {
                 // TODO change name of showAction in ProfileController so it won't be overwritten
-                if ($controller == 'profile') {
-                    header('Location: ' . $this->_app->getBaseUri() . '?c=resource&a=show&id=' .
-                    $objectId);
-                } else {
-                    header('Location: ' . $this->_app->getBaseUri() . '?c=' . $controller .
-                    '&a=show&id=' . $objectId);
-                }
+                header('Location: ' . $this->_app->getBaseUri() . '?c=' . $controller .
+                '&a=show&id=' . $objectId);
                 return $template;
             }
         }
