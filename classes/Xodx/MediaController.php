@@ -65,7 +65,6 @@ class Xodx_MediaController extends Xodx_Controller
         $tmpFile = $_FILES[$fieldName]['name'];
 
         // Check if file's MIME-Type is an image
-        var_dump($_FILES);
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $checkType = finfo_file($finfo, $_FILES[$fieldName]['tmp_name']);
         finfo_close($finfo);

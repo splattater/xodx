@@ -288,8 +288,6 @@ class Xodx_ActivityController extends Xodx_Controller
         foreach ($feeds as $feed) {
             $userController->subscribeToFeed($actorUri, $feed);
         }
-
-        //return $feedUri . "\n" . var_export($activity, true);
     }
 
     /**
