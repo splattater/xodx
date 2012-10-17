@@ -1,7 +1,7 @@
 <?php
-
 /**
  * This class represents an aair:Activity
+ * TODO: replace this by DSSN_Activity from dssn-lib-php
  */
 class Xodx_Activity
 {
@@ -9,9 +9,10 @@ class Xodx_Activity
     private $_actorUri;
     private $_verbUri;
     private $_objectUri;
+    private $_contextUri;
     private $_date;
 
-    public function __construct ($uri, $actorUri, $verbUri, $objectUri, $date = null)
+    public function __construct ($uri, $actorUri, $verbUri, $objectUri, $contextUri = null, $date = null)
     {
         if ($uri === null) {
             $this->_uri = 'http://localhost/~natanael/xodx/activity/' . md5(rand()) . '/';
@@ -22,10 +23,17 @@ class Xodx_Activity
         $this->_actorUri = $actorUri;
         $this->_verbUri = $verbUri;
         $this->_objectUri = $objectUri;
+
         if ($date === null) {
             $this->_date = date('c');
         } else {
             $this->_date = $date;
+        }
+
+        if ($context !== null) {
+            $this->_contextUri = $contextUri;
+        } else {
+            $this->_contextUri = '';
         }
     }
 
@@ -44,9 +52,14 @@ class Xodx_Activity
         return $this->_objectUri;
     }
 
+    public function getContext ()
+    {
+        return $this->_contextUri;
+    }
+
     public function getDate ()
     {
-        retunr $this->_date;
+        return $this->_date;
     }
 
     public function toGraphArray ()
@@ -91,6 +104,15 @@ class Xodx_Activity
                 )
             )
         );
+        if (!empty($this->_contextUri)) {
+            $return[$this->_uri][$nsAair . 'activityContext'][0]['type'] = 'uri';
+            $return[$this->_uri][$nsAair . 'activityContext'][0]['value'] = $this->_contextUri;
+        }
+
+        if (!empty($this->_contextUri)) {
+            $return[$this->_uri][$nsAair . 'activityContext'][0]['type'] = 'uri';
+            $return[$this->_uri][$nsAair . 'activityContext'][0]['value'] = $this->_contextUri;
+        }
 
         return $return;
     }
