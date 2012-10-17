@@ -392,7 +392,7 @@ class Xodx_ActivityController extends Xodx_Controller
             'SELECT ?activity ?date ?verb ?object ?person ' .
             'WHERE { ' .
             '   ?activity a                   aair:Activity ; ' .
-            '             ?p <' . $resourceUri . '> ; ' .
+            '             ?p             <' . $resourceUri . '> ; ' .
             '             aair:activityActor  ?person ; ' .
             '             atom:published      ?date ; ' .
             '             aair:activityVerb   ?verb ; ' .
@@ -408,11 +408,13 @@ class Xodx_ActivityController extends Xodx_Controller
             'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
             'SELECT DISTINCT ?activity ?date ?verb ?object ?person ' .
             'WHERE { ' .
-            '    <' . $resourceUri . '>       a aair:Activity ; ' .
-            '             aair:activityActor  ?person ; ' .
-            '             atom:published      ?date ; ' .
-            '             aair:activityVerb   ?verb ; ' .
-            '             aair:activityObject ?object . ' .
+            '    <' . $resourceUri . '> a                    aair:Activity ; ' .
+            '                           aair:activityActor   ?person ; ' .
+            '                           atom:published       ?date ; ' .
+            '                           aair:activityVerb    ?verb ; ' .
+            '                           aair:activityObject  ?object . ' .
+            'OPTIONAL { ' .
+            '    <' . $resourceUri . '> aair:activityContext ?context . } ' .
             /**' OPTIONAL { ' .
             '    ?activity a aair:Activity ; ' .
             '              ?p <' . $resourceUri . '> ; ' .
@@ -450,32 +452,36 @@ class Xodx_ActivityController extends Xodx_Controller
 
         $activities = array();
 
-        foreach ($activitiesResult as $activity) {
-            if ($activity['activity'] === null) {
+        foreach ($activitiesResult as $act) {
+            if ($act['activity'] === null) {
                 $activityUri = $resourceUri;
             } else {
-                $activityUri = $activity['activity'];
+                $activityUri = $act['activity'];
             }
 
-            $verbUri = $activity['verb'];
-            $objectUri = $activity['object'];
-            $activity['date'] = self::_issueE24fix($activity['date']);
+            //$verbUri = $act['verb'];
+            $objectUri = $act['object'];
+            $act['date'] = self::_issueE24fix($act['date']);
 
             $nameHelper = new Xodx_NameHelper($this->_app);
             $type = $resourceController->getType($objectUri);
-            $personName = $nameHelper->getName($activity['person']);
-            $title = '"' . $personName . '" did "' . $activity['verb'] . '" a "' . $type . '"';
+            $personName = $nameHelper->getName($act['person']);
+            $title = '"' . $personName . '" did "' . $act['verb'] . '" a "' . $type . '"';
 
             $activity = array(
-                'title' => $title,
-                'uri' => $activityUri,
-                'author' => $personName,
-                'authorUri' => $activity['person'],
-                'pubDate' => $activity['date'],
-                'verb' => $activity['verb'],
-                'object' => $activity['object'],
-                'type' => $type,
+                'title'     => $title,
+                'uri'       => $activityUri,
+                'author'    => $personName,
+                'authorUri' => $act['person'],
+                'pubDate'   => $act['date'],
+                'verb'      => $act['verb'],
+                'object'    => $objectUri,
+                'type'      => $type,
             );
+
+            if (isset($act['context'])) {
+                $activity['context'] = $act['context'];
+            }
 
             $objectResult = $model->sparqlQuery(
                 'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .

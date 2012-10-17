@@ -34,8 +34,19 @@
 
         <activity:object-type><?= $activity['objectType'] ?></activity:object-type>
         <?php endif; ?>
-
       </activity:object>
+
+      <?php if (isset($activity['context'])) : ?>
+      <activity:target>
+        <id><?= htmlentities($activity['context']) ?></id>
+
+        <?php if (isset($activity['contextType'])) : ?>
+
+        <activity:object-type><?= $activity['contextType'] ?></activity:object-type>
+        <?php endif; ?>
+
+      </activity:target>
+      <?php endif; ?>
     </entry>
 
     <?php endforeach; ?>

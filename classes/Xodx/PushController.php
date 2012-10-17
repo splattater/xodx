@@ -178,7 +178,7 @@ class Xodx_PushController extends Xodx_Controller
         if ($httpCode - ($httpCode % 100) != 200) {
             throw new Exception('Publishing to hub failed');
         }
-   */ }
+    }
 
     /**
      * This action is used as callback for the subscriber and it will be triggered if the hub

@@ -87,6 +87,7 @@ class Xodx_FeedController extends Xodx_Controller
             $actorUri = $activity->getActor();
             $verbUri = $activity->getVerb();
             $objectUri = $activity->getObject();
+            $contextUri = $activity->getTarget();
             $activity[] = new Activity(null, $actorUri, $verbUri, $objectUri, $date);
             $activityController->addActivities($activity);
         }

@@ -35,7 +35,7 @@ if ($contact['name'] != null) {
     <?php foreach ($this->profileshowActivities as $activity) : ?>
     <div class="activity">
         <p>
-            <!-- <a href="<?= $activity['uri'] ?>"><strong><?= $activity['title'] ?></strong></a><br /> -->
+            <a href="<?= $activity['uri'] ?>"><strong><?= $activity['title'] ?></strong></a><br />
         </p>
         <div>
             <form method="post" action="?c=activity&amp;a=replyForm">
