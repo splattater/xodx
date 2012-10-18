@@ -406,7 +406,7 @@ class Xodx_ActivityController extends Xodx_Controller
             'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
             'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
             'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
-            'SELECT DISTINCT ?activity ?date ?verb ?object ?person ' .
+            'SELECT DISTINCT ?activity ?date ?verb ?object ?person ?context ' .
             'WHERE { ' .
             '    <' . $resourceUri . '> a                    aair:Activity ; ' .
             '                           aair:activityActor   ?person ; ' .
@@ -444,7 +444,7 @@ class Xodx_ActivityController extends Xodx_Controller
 
         $isPerson = false;
 
-        if ($type == $nsFoaf . 'PersonalProfileDocument') {
+        if ($type == $nsFoaf . 'Person') {
             $isPerson = true;
         }
 
