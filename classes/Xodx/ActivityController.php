@@ -424,7 +424,7 @@ class Xodx_ActivityController extends Xodx_Controller
             '              aair:activityVerb   ?verb ; ' .
             '} ' . **/
             '} ' .
-            'ORDER BY DESC(?date)';
+            'ORDER DESC BY ?date ';
 
         $model = $this->_app->getBootstrap()->getResource('model');
 
