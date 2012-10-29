@@ -406,7 +406,7 @@ class Xodx_ActivityController extends Xodx_Controller
             'PREFIX atom: <http://www.w3.org/2005/Atom/> ' .
             'PREFIX aair: <http://xmlns.notu.be/aair#> ' .
             'PREFIX sioc: <http://rdfs.org/sioc/ns#> ' .
-            'SELECT DISTINCT ?activity ?date ?verb ?object ?person ?context ' .
+            'SELECT DISTINCT ?date ?verb ?object ?person ?context ' .
             'WHERE { ' .
             '    <' . $resourceUri . '> a                    aair:Activity ; ' .
             '                           aair:activityActor   ?person ; ' .
@@ -415,16 +415,7 @@ class Xodx_ActivityController extends Xodx_Controller
             '                           aair:activityObject  ?object . ' .
             'OPTIONAL { ' .
             '    <' . $resourceUri . '> aair:activityContext ?context . } ' .
-            /**' OPTIONAL { ' .
-            '    ?activity a aair:Activity ; ' .
-            '              ?p <' . $resourceUri . '> ; ' .
-            '              aair:activityObject ?object ; ' .
-            '              aair:activityActor  ?person ; ' .
-            '              atom:published      ?date ; ' .
-            '              aair:activityVerb   ?verb ; ' .
-            '} ' . **/
-            '} ' .
-            'ORDER DESC BY ?date ';
+            '} ';
 
         $model = $this->_app->getBootstrap()->getResource('model');
 
